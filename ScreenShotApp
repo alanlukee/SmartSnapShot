@@ -1,0 +1,112 @@
+
+package com.SmartSnapShot;
+
+import java.awt.Color;
+import java.awt.Image;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+
+public class ScreenShotApp {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		JFrame frame = new JFrame("smart screenshot");
+		
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(450,150);
+		frame.setLayout(null);
+		frame.getContentPane().setBackground(Color.white);
+		
+		
+		// start button 
+		int startButtonHeight = 80;
+		int startButtonWidth = 75;
+		
+		ImageIcon orginalIcon = new ImageIcon("C:\\Users\\2021615\\Desktop\\snapshot_icon.png");
+		Image scaledImage = orginalIcon.getImage().getScaledInstance(startButtonWidth, startButtonHeight, Image.SCALE_SMOOTH);
+		ImageIcon scaledIcon = new ImageIcon(scaledImage);
+		
+		JButton startButton = new JButton(scaledIcon);
+		startButton.setBounds(50,20,startButtonWidth,startButtonHeight);
+		startButton.setToolTipText("start screen capture");
+		frame.add(startButton);
+		
+		
+		// end button 
+		
+		int endButtonWidth = 60;
+		int endButtonHeight = 65;
+		
+		ImageIcon originalIcon1 = new ImageIcon("C:\\Users\\2021615\\Desktop\\stop_icon.png");
+		Image scaledImage1 = originalIcon1.getImage().getScaledInstance(endButtonWidth, endButtonHeight,Image.SCALE_SMOOTH);
+		ImageIcon scaledIcon1 = new ImageIcon(scaledImage1);
+		
+		JButton endButton = new JButton(scaledIcon1);
+		endButton.setBounds(200,28,endButtonWidth,endButtonHeight);
+		
+		endButton.setToolTipText("stop screen capture");
+		frame.add(endButton);
+		
+		// timer Button
+		
+		int timerButtonWidth =  60;
+		int timerButtonHeight = 65;
+		
+		ImageIcon originalIcon2 = new ImageIcon("C:\\Users\\2021615\\Desktop\timer.png");
+		Image scaledImage2 = originalIcon2.getImage().getScaledInstance(timerButtonWidth, timerButtonHeight, Image.SCALE_SMOOTH);
+		ImageIcon scaledIcon2 = new ImageIcon(scaledImage2);
+		
+		JButton timerButton = new JButton(scaledIcon2);
+		timerButton.setBounds(320,25,timerButtonWidth,timerButtonHeight);
+		timerButton.setToolTipText(" screenshot interval");
+		frame.add(timerButton);
+		
+		// list for time intervals(1 - 10) seconds
+		
+		String[] timeIntervals = {"1 sec","2 sec","3 sec","4 sec ","5 sec","6 sec","7 sec","8 sec","9 sec","10 sec"};
+		JList<String> timeList = new JList<>(timeIntervals);
+		
+		timeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		// add the list to scroll pane
+		
+		JScrollPane scrollPane = new JScrollPane(timeList);
+		
+		// create a pop up menu and add the scroll pane to it
+		
+		JPopupMenu popupMenu = new JPopupMenu();
+		popupMenu.add(scrollPane);
+		
+		// show the popup menu when timer button is clicked
+		
+		timerButton.addActionListener(e ->{
+			popupMenu.show(timerButton,0,timerButton.getHeight());
+			});
+		
+		// add list selection listener to handle the selection of time intervals
+		
+		timeList.addListSelectionListener(event ->{
+			if(! event.getValueIsAdjusting()) {
+				String selectedInterval = timeList.getSelectedValue();
+				
+				if(selectedInterval != null) {
+					timerButton.setToolTipText("selected interval:"+ selectedInterval);
+					
+					// close the popup menu
+					popupMenu.setVisible(false);
+				}
+			}
+		});
+		
+		frame.setVisible(true);
+
+	}
+
+}
