@@ -20,12 +20,12 @@ public class ScreenShotApp {
 		int startButtonHeight = 85;
 		int startButtonWidth = 80;
 		
-		ImageIcon orginalIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\camera_icon.jpg");
+		ImageIcon startIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\camera_icon.jpg");
 		
-		Image scaledImage = orginalIcon.getImage().getScaledInstance(startButtonWidth, startButtonHeight, Image.SCALE_SMOOTH);
-		ImageIcon scaledIcon = new ImageIcon(scaledImage);
+		Image scaledStartImage = startIcon.getImage().getScaledInstance(startButtonWidth, startButtonHeight, Image.SCALE_SMOOTH);
+		ImageIcon scaledStartIcon = new ImageIcon(scaledStartImage);
 		
-		JButton startButton = new JButton(scaledIcon);
+		JButton startButton = new JButton(scaledStartIcon);
 		startButton.setBounds(50,20,startButtonWidth,startButtonHeight);
 		startButton.setBorderPainted(false);
 		startButton.setToolTipText("start screen capture");
@@ -33,35 +33,35 @@ public class ScreenShotApp {
 		
 		
 		//end button
+		
 		int endButtonWidth = 60;
 		int endButtonHeight = 65;
 		
-		ImageIcon originalIcon1 = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\stop.png");
-		Image scaledImage1 = originalIcon1.getImage().getScaledInstance(endButtonWidth, endButtonHeight,Image.SCALE_SMOOTH);
-		ImageIcon scaledIcon1 = new ImageIcon(scaledImage1);
+		ImageIcon stopIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\stop.png");
+		Image scaledStopImage = stopIcon.getImage().getScaledInstance(endButtonWidth, endButtonHeight,Image.SCALE_SMOOTH);
+		ImageIcon scaledStopIcon = new ImageIcon(scaledStopImage);
 		
-		JButton endButton = new JButton(scaledIcon1);
+		JButton endButton = new JButton(scaledStopIcon);
 		endButton.setBounds(190,33,endButtonWidth,endButtonHeight);
 		endButton.setBorderPainted(false);
-		endButton.setToolTipText("stop screen capture");
+		endButton.setToolTipText("Stop screen capture");
 		frame.add(endButton);
 		
 		// timer Button
-		
+
 		int timerButtonWidth =  60;
 		int timerButtonHeight = 65;
 		
-		ImageIcon originalIcon2 = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\timer.jpg");
-		Image scaledImage2 = originalIcon2.getImage().getScaledInstance(timerButtonWidth, timerButtonHeight, Image.SCALE_SMOOTH);
-		ImageIcon scaledIcon2 = new ImageIcon(scaledImage2);
+		ImageIcon timerIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\timer.jpg");
+		Image timerImage= timerIcon.getImage().getScaledInstance(timerButtonWidth, timerButtonHeight, Image.SCALE_SMOOTH);
+		ImageIcon scaledTimerIcon = new ImageIcon(timerImage);
 		
-		JButton timerButton = new JButton(scaledIcon2);
+		JButton timerButton = new JButton(scaledTimerIcon);
 		timerButton.setBounds(310,30,timerButtonWidth,timerButtonHeight);
 		timerButton.setBorderPainted(false);
-		timerButton.setToolTipText(" screenshot interval");
+		timerButton.setToolTipText("Snapshot interval");
 		frame.add(timerButton);
-		
-		
+	
 		//time interval list
 		String[] timeIntervals = {"1 seconds","2 seconds","3 seconds","4 seconds","5 seconds"};
 		JList<String> timeList = new JList<>(timeIntervals);
@@ -83,12 +83,13 @@ public class ScreenShotApp {
 						
 				if(selectedInterval != null) {
 					timerButton.setToolTipText("selected interval:"+ selectedInterval);
-							// close the popup menu
+							//close the popup menu
 					popupMenu.setVisible(false);
 						}
 					}
 				});
 		
+		frame.setLocation(1050, 650);
 		frame.setVisible(true);
 
 	}
