@@ -25,6 +25,12 @@ public class ScreenShotApp {
 		Image scaledStartImage = startIcon.getImage().getScaledInstance(startButtonWidth, startButtonHeight, Image.SCALE_SMOOTH);
 		ImageIcon scaledStartIcon = new ImageIcon(scaledStartImage);
 		
+		//active icon for the start button.
+		
+		ImageIcon activeIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\camera_active.png");
+		Image scaledActiveImage = activeIcon.getImage().getScaledInstance(startButtonWidth, startButtonHeight,  Image.SCALE_SMOOTH);
+		ImageIcon scaledActiveIcon = new ImageIcon(scaledActiveImage);
+		
 		JButton startButton = new JButton(scaledStartIcon);
 		startButton.setBounds(50,20,startButtonWidth,startButtonHeight);
 		startButton.setBorderPainted(false);
@@ -34,15 +40,15 @@ public class ScreenShotApp {
 		
 		//end button
 		
-		int endButtonWidth = 60;
-		int endButtonHeight = 65;
+		int endButtonWidth = 85;
+		int endButtonHeight = 80;
 		
 		ImageIcon stopIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\stop.png");
 		Image scaledStopImage = stopIcon.getImage().getScaledInstance(endButtonWidth, endButtonHeight,Image.SCALE_SMOOTH);
 		ImageIcon scaledStopIcon = new ImageIcon(scaledStopImage);
 		
 		JButton endButton = new JButton(scaledStopIcon);
-		endButton.setBounds(190,33,endButtonWidth,endButtonHeight);
+		endButton.setBounds(180,23,endButtonWidth,endButtonHeight);
 		endButton.setBorderPainted(false);
 		endButton.setToolTipText("Stop screen capture");
 		frame.add(endButton);
@@ -88,6 +94,18 @@ public class ScreenShotApp {
 						}
 					}
 				});
+		
+		
+		//adding action listener to start button to change its icon.
+		startButton.addActionListener(e->
+					startButton.setIcon(scaledActiveIcon)
+					);
+		
+		//adding action listener to stop button---> to restore the start button icon.
+		
+		endButton.addActionListener(e->
+		startButton.setIcon(scaledStartIcon));
+		
 		
 		frame.setLocation(1050, 650);
 		frame.setVisible(true);
