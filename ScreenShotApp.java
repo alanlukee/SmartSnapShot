@@ -1,19 +1,24 @@
 package com.SmartSnapShot;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 
 public class ScreenShotApp {
+	
+	private static int screenshotCounter = 1;
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		JFrame frame = new JFrame("Smart SnapShot");
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(460,200);
+		frame.setSize(460,150);
 		frame.setLayout(null);
 		frame.getContentPane().setBackground(Color.BLACK);
 		
@@ -53,6 +58,7 @@ public class ScreenShotApp {
 		endButton.setBounds(190,20,endButtonWidth,endButtonHeight);
 		endButton.setBorderPainted(false);
 		endButton.setToolTipText("Stop screen capture");
+		endButton.setEnabled(false);
 		frame.add(endButton);
 		
 		// timer Button
@@ -133,8 +139,36 @@ public class ScreenShotApp {
 		startButton.addActionListener(e->
 		{
 					startButton.setIcon(scaledActiveIcon);
-					System.out.println("Snapshot started");
-					//frame.setState(Frame.ICONIFIED);
+					System.out.println("Snapshot functionality initiated");
+					frame.setState(Frame.ICONIFIED);
+					frame.setIconImage(scaledStopImage);
+					endButton.setEnabled(true);
+					
+					try {
+						Robot robot = new Robot();
+						Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+						Rectangle screenRect = new Rectangle(screenSize);
+						
+						BufferedImage screenshot = robot.createScreenCapture(screenRect);
+						
+						String folderPath = "C:\\Users\\2021603\\Desktop\\snapShots\\";
+						File folder = new File(folderPath);
+						
+						String fileName = "screenshot_" +screenshotCounter+".png";
+						File file = new File(folderPath+fileName);
+						ImageIO.write(screenshot, "png", file);
+						System.out.println("Screen captured");
+						System.out.println("Screenshot saved: "+file.getAbsolutePath());
+						
+						JOptionPane.showMessageDialog(null, "Screenshot saved: "+file.getAbsolutePath());
+						
+						screenshotCounter++;
+						
+					}
+					catch(Exception ex){
+						ex.printStackTrace();
+						JOptionPane.showMessageDialog(frame, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
+					}	
 		});
 		
 		//adding action listener to stop button---> to restore the start button icon.
@@ -143,10 +177,13 @@ public class ScreenShotApp {
 		{
 		startButton.setIcon(scaledStartIcon);
 		System.out.println("Snapshot stopped");
+		frame.setIconImage(scaledStartImage);
+		//frame.setState(Frame.ICONIFIED);
+		//frame.dispose();
 		});
 		
-		frame.setLocation(1050, 650);
-		//frame.setLocationRelativeTo(null);
+		//frame.setLocation(1050, 650);
+		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 
 	}
