@@ -7,11 +7,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class ScreenShotApp extends JFrame {
 	
 	private static int screenshotCounter = 1;
+	private Timer screenshotTimer;
 	
 	public ScreenShotApp() {
 		
@@ -77,7 +80,7 @@ public class ScreenShotApp extends JFrame {
 		 DefaultListModel<String> listModel = new DefaultListModel<String>();
 			
 			for(int i = 1; i <= 10;i++) {
-				listModel.addElement(i+" second"+ (i >1 ? "s":""));
+				listModel.addElement(Integer.toString(i));
 			}
 			
 			JList<String> timeList = new JList<>(listModel);
@@ -99,6 +102,7 @@ public class ScreenShotApp extends JFrame {
 						
 				if(selectedInterval != null) {
 					timerButton.setToolTipText("selected interval:"+ selectedInterval);
+					System.out.println(selectedInterval);
 							//close the popup menu
 					popupMenu.setVisible(false);
 						}
@@ -110,43 +114,29 @@ public class ScreenShotApp extends JFrame {
 		//adding action listener to start button to change its icon.
 		startButton.addActionListener(e->
 		{
-			if(!isActive[0]) {
+			if(!isActive[0]) { //start button is not active now
 				
 				startButton.setIcon(scaledActiveIcon);
 				System.out.println("Snapshot functionality initiated");
 				setState(Frame.ICONIFIED);
 				setIconImage(scaledActiveImage);
 				endButton.setEnabled(true);
+				
+				
+			screenshotTimer = new Timer();
 			
-					try {
-						Robot robot = new Robot(); //interface to interact with the screen
-						
-						Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //provides access to the systems graphical environment.
-						//getScreenSize() would fetch the dimensions of the entire screen.
-						
-						Rectangle screenRect = new Rectangle(screenSize); //Rectangle class is used to define a rectangular region.
-						
-						BufferedImage screenshot = robot.createScreenCapture(screenRect); //captures the screenarea defined by screenrect
-						//																	and stored as a bufferedImage object
-						
-						String folderPath = "C:\\Users\\2021603\\Desktop\\snapShots\\";
-						String fileName = "screenshot_" +screenshotCounter+".png";
-						File file = new File(folderPath+fileName);
-						ImageIO.write(screenshot, "png", file);
-						System.out.println("Screen captured");
-						System.out.println("Screenshot saved: "+file.getAbsolutePath());
-						
-						JOptionPane.showMessageDialog(null, "Screenshot saved: "+file.getAbsolutePath());
-						
-						screenshotCounter++;
-						
-					}
-					catch(Exception ex){
-						ex.printStackTrace();
-						JOptionPane.showMessageDialog(null, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
-					}
+			screenshotTimer.scheduleAtFixedRate(new TimerTask() {
 
-					isActive[0] = true;
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					takeScreenshot();
+				}
+				
+			}, 0, 2000);
+			
+			isActive[0] = true; //start button is active now
+		
 			}
 		
 			else {
@@ -159,17 +149,55 @@ public class ScreenShotApp extends JFrame {
 		endButton.addActionListener(e->
 		
 		{
-			startButton.setIcon(scaledStartIcon);
-			System.out.println("Snapshot stopped");
-			setIconImage(scaledStartImage);
-
-			isActive[0]=false;
+			if(isActive[0]){
+				startButton.setIcon(scaledStartIcon);
+				System.out.println("Snapshot stopped");
+				endButton.setEnabled(false);
+				
+				if(screenshotTimer!=null){
+					screenshotTimer.cancel();
+				}
+				
+				isActive[0]=false;
+			}
 		});
-		
-		setLocation(1050, 650);
-		//setLocationRelativeTo(null);
-		setVisible(true);
+			setLocation(1050, 650);
+			//setLocationRelativeTo(null);
+			setVisible(true);
+			//setIconImage(scaledStartImage);
+	}
+	
+	private void takeScreenshot() {
+				
+		try {
+			Robot robot = new Robot(); //interface to interact with the screen
+			
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //provides access to the systems graphical environment.
+			//getScreenSize() would fetch the dimensions of the entire screen.
+			
+			Rectangle screenRect = new Rectangle(screenSize); //Rectangle class is used to define a rectangular region.
+			
+			BufferedImage screenshot = robot.createScreenCapture(screenRect); //captures the screenarea defined by screenrect
+			//																	and stored as a bufferedImage object
+			
+			String folderPath = "C:\\Users\\2021603\\Desktop\\snapShots\\";
+			String fileName = "screenshot_" +screenshotCounter+".png";
+			File file = new File(folderPath+fileName);
+			ImageIO.write(screenshot, "png", file);
+			System.out.println("Screen captured");
+			System.out.println("Screenshot saved: "+file.getAbsolutePath());
+			
+			//JOptionPane.showMessageDialog(null, "Screenshot saved: "+file.getAbsolutePath());
+			
+			screenshotCounter++;
+			
+		}
+		catch(Exception ex){
+			ex.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
+		}
 
+		
 	}
 	}
 
