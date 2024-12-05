@@ -9,26 +9,24 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 
-public class ScreenShotApp {
+public class ScreenShotApp extends JFrame {
 	
 	private static int screenshotCounter = 1;
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		JFrame frame = new JFrame("Smart SnapShot");
+	
+	public ScreenShotApp() {
 		
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(460,150);
-		frame.setLayout(null);
-		frame.getContentPane().setBackground(Color.BLACK);
+		super("Smart SnapShot");
 		
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(460,150);
+		setLayout(null);
+		getContentPane().setBackground(Color.BLACK);
 		
 		// start button 
 		int startButtonHeight = 85;
 		int startButtonWidth = 80;
 		
 		ImageIcon startIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\snapshot_icon.png");
-		
 		Image scaledStartImage = startIcon.getImage().getScaledInstance(startButtonWidth, startButtonHeight, Image.SCALE_SMOOTH);
 		ImageIcon scaledStartIcon = new ImageIcon(scaledStartImage);
 		
@@ -42,8 +40,7 @@ public class ScreenShotApp {
 		startButton.setBounds(50,20,startButtonWidth,startButtonHeight);
 		startButton.setBorderPainted(false);
 		startButton.setToolTipText("start screen capture");
-		frame.add(startButton);
-		
+		add(startButton);
 		
 		//end button
 		
@@ -59,7 +56,7 @@ public class ScreenShotApp {
 		endButton.setBorderPainted(false);
 		endButton.setToolTipText("Stop screen capture");
 		endButton.setEnabled(false);
-		frame.add(endButton);
+		add(endButton);
 		
 		// timer Button
 
@@ -67,17 +64,15 @@ public class ScreenShotApp {
 		int timerButtonHeight = 80;
 		
 		ImageIcon timerIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\timer.png");
-		Image timerImage= timerIcon.getImage().getScaledInstance(timerButtonWidth, timerButtonHeight, Image.SCALE_SMOOTH);
+		Image timerImage = timerIcon.getImage().getScaledInstance(timerButtonWidth, timerButtonHeight, Image.SCALE_SMOOTH);
 		ImageIcon scaledTimerIcon = new ImageIcon(timerImage);
 		
 		JButton timerButton = new JButton(scaledTimerIcon);
 		timerButton.setBounds(310,18,timerButtonWidth,timerButtonHeight);
 		timerButton.setBorderPainted(false);
 		timerButton.setToolTipText("Snapshot interval");
-		frame.add(timerButton);
-		
-		
-	
+		add(timerButton);
+
 		//time interval list
 		 DefaultListModel<String> listModel = new DefaultListModel<String>();
 			
@@ -109,51 +104,32 @@ public class ScreenShotApp {
 						}
 					}
 				});
-		
-//		// button to dynamically add new intervals
-//		
-//		JButton addButton = new JButton("+");
-//		addButton.setBounds(350,110,50,50);
-//		frame.add(addButton);
-//		
-//		addButton.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				String newInterval = JOptionPane.showInputDialog(frame,"Enter new Interval(in seconds)");
-//				if(newInterval != null && !newInterval.trim().isEmpty()) {
-//					try {
-//						
-//						int interval = Integer.parseInt(newInterval.trim());
-//						listModel.addElement(interval + "second"+(interval > 1?"s" :""));
-//						
-//					} catch(NumberFormatException ex) {
-//						
-//						JOptionPane.showMessageDialog(frame,"Please enter a valid number!","Invalid input",JOptionPane.ERROR_MESSAGE);
-//					}
-//				}
-//			}
-//		});
-		
+				
+		boolean[] isActive = {false};
 		
 		//adding action listener to start button to change its icon.
 		startButton.addActionListener(e->
 		{
-					startButton.setIcon(scaledActiveIcon);
-					System.out.println("Snapshot functionality initiated");
-					frame.setState(Frame.ICONIFIED);
-					frame.setIconImage(scaledStopImage);
-					endButton.setEnabled(true);
-					
+			if(!isActive[0]) {
+				
+				startButton.setIcon(scaledActiveIcon);
+				System.out.println("Snapshot functionality initiated");
+				setState(Frame.ICONIFIED);
+				setIconImage(scaledActiveImage);
+				endButton.setEnabled(true);
+			
 					try {
-						Robot robot = new Robot();
-						Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-						Rectangle screenRect = new Rectangle(screenSize);
+						Robot robot = new Robot(); //interface to interact with the screen
 						
-						BufferedImage screenshot = robot.createScreenCapture(screenRect);
+						Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //provides access to the systems graphical environment.
+						//getScreenSize() would fetch the dimensions of the entire screen.
+						
+						Rectangle screenRect = new Rectangle(screenSize); //Rectangle class is used to define a rectangular region.
+						
+						BufferedImage screenshot = robot.createScreenCapture(screenRect); //captures the screenarea defined by screenrect
+						//																	and stored as a bufferedImage object
 						
 						String folderPath = "C:\\Users\\2021603\\Desktop\\snapShots\\";
-						File folder = new File(folderPath);
-						
 						String fileName = "screenshot_" +screenshotCounter+".png";
 						File file = new File(folderPath+fileName);
 						ImageIO.write(screenshot, "png", file);
@@ -167,25 +143,33 @@ public class ScreenShotApp {
 					}
 					catch(Exception ex){
 						ex.printStackTrace();
-						JOptionPane.showMessageDialog(frame, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
-					}	
+						JOptionPane.showMessageDialog(null, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
+					}
+
+					isActive[0] = true;
+			}
+		
+			else {
+				System.out.println("Start button is already active.");
+			}
 		});
 		
 		//adding action listener to stop button---> to restore the start button icon.
 		
 		endButton.addActionListener(e->
+		
 		{
-		startButton.setIcon(scaledStartIcon);
-		System.out.println("Snapshot stopped");
-		frame.setIconImage(scaledStartImage);
-		//frame.setState(Frame.ICONIFIED);
-		//frame.dispose();
+			startButton.setIcon(scaledStartIcon);
+			System.out.println("Snapshot stopped");
+			setIconImage(scaledStartImage);
+
+			isActive[0]=false;
 		});
 		
-		//frame.setLocation(1050, 650);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		setLocation(1050, 650);
+		//setLocationRelativeTo(null);
+		setVisible(true);
 
 	}
+	}
 
-}
