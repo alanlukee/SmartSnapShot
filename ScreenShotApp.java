@@ -20,7 +20,6 @@ public class ScreenShotApp extends JFrame {
 	public ScreenShotApp() {
 		
 		super("Smart SnapShot");
-		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(460,150);
 		setLayout(null);
@@ -44,6 +43,7 @@ public class ScreenShotApp extends JFrame {
 		startButton.setBounds(50,20,startButtonWidth,startButtonHeight);
 		startButton.setBorderPainted(false);
 		startButton.setToolTipText("start screen capture");
+		startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		add(startButton);
 		
 		//end button
@@ -60,6 +60,8 @@ public class ScreenShotApp extends JFrame {
 		endButton.setBorderPainted(false);
 		endButton.setToolTipText("Stop screen capture");
 		endButton.setEnabled(false);
+		endButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
 		add(endButton);
 		
 		// timer Button
@@ -74,6 +76,8 @@ public class ScreenShotApp extends JFrame {
 		timerButton.setBounds(310,18,timerButtonWidth,timerButtonHeight);
 		timerButton.setBorderPainted(false);
 		timerButton.setToolTipText("Snapshot interval");
+		timerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
 		add(timerButton);
 
 		//time interval list
@@ -121,9 +125,6 @@ public class ScreenShotApp extends JFrame {
 					}
 				});
 		
-		
-		
-
 		//adding action listener to start button to change its icon.
 		startButton.addActionListener(e->
 		{
@@ -181,8 +182,11 @@ public class ScreenShotApp extends JFrame {
 	}
 	
 		private void takeScreenshot() {
+		
 				
 			try {
+				
+				flashScreen();
 				Robot robot = new Robot(); //interface to interact with the screen
 				
 				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //provides access to the systems graphical environment.
@@ -209,10 +213,28 @@ public class ScreenShotApp extends JFrame {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
 			}
-
-		
 	}
 		
+		
+		private void flashScreen() {
+			
+			JWindow flashWindow = new JWindow();
+			flashWindow.setBackground(new Color(255,255,255,150));
+			flashWindow.setBounds(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+			flashWindow.setAlwaysOnTop(true);
+			
+
+			flashWindow.setVisible(true);
+			try {
+				Thread.sleep(70);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			flashWindow.dispose();
+			
+			}
+
 		private void restartTimer() {
 			
 			if(screenshotTimer!=null) {
@@ -230,10 +252,6 @@ public class ScreenShotApp extends JFrame {
 			}, 0, interval);
 			
 			System.out.println("Timer restarted with new interval: "+interval/1000+" seconds");
-		
-	
-		}	
-		
-		
+		}		
 	}
 
