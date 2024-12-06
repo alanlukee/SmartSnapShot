@@ -30,13 +30,13 @@ public class ScreenShotApp extends JFrame {
 		int startButtonHeight = 85;
 		int startButtonWidth = 80;
 		
-		ImageIcon startIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\snapshot_icon.png");
+		ImageIcon startIcon = new ImageIcon("src\\assets\\snapshot_icon.png");
 		Image scaledStartImage = startIcon.getImage().getScaledInstance(startButtonWidth, startButtonHeight, Image.SCALE_SMOOTH);
 		ImageIcon scaledStartIcon = new ImageIcon(scaledStartImage);
 		
 		//active icon for the start button.
 		
-		ImageIcon activeIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\snapshot_active.png");
+		ImageIcon activeIcon = new ImageIcon("src\\assets\\snapshot_active.png");
 		Image scaledActiveImage = activeIcon.getImage().getScaledInstance(startButtonWidth, startButtonHeight,  Image.SCALE_SMOOTH);
 		ImageIcon scaledActiveIcon = new ImageIcon(scaledActiveImage);
 		
@@ -51,7 +51,7 @@ public class ScreenShotApp extends JFrame {
 		int endButtonWidth = 75;
 		int endButtonHeight = 84;
 		
-		ImageIcon stopIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\snapshot_stop.png");
+		ImageIcon stopIcon = new ImageIcon("src\\assets\\snapshot_stop.png");
 		Image scaledStopImage = stopIcon.getImage().getScaledInstance(endButtonWidth, endButtonHeight,Image.SCALE_SMOOTH);
 		ImageIcon scaledStopIcon = new ImageIcon(scaledStopImage);
 		
@@ -66,7 +66,7 @@ public class ScreenShotApp extends JFrame {
 		int timerButtonWidth =  75;
 		int timerButtonHeight = 80;
 		
-		ImageIcon timerIcon = new ImageIcon("C:\\Users\\2021603\\eclipse-workspace\\SmartSnapShot\\src\\assets\\timer.png");
+		ImageIcon timerIcon = new ImageIcon("src\\assets\\timer.png");
 		Image timerImage = timerIcon.getImage().getScaledInstance(timerButtonWidth, timerButtonHeight, Image.SCALE_SMOOTH);
 		ImageIcon scaledTimerIcon = new ImageIcon(timerImage);
 		
@@ -77,13 +77,13 @@ public class ScreenShotApp extends JFrame {
 		add(timerButton);
 
 		//time interval list
-		 DefaultListModel<String> listModel = new DefaultListModel<String>();
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
 			
 			for(int i = 1; i <= 10;i++) {
 				listModel.addElement(Integer.toString(i));
 			}
 			
-			JList<String> timeList = new JList<>(listModel);
+		JList<String> timeList = new JList<>(listModel);
 				
 		timeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);		
 		JScrollPane scrollPane = new JScrollPane(timeList);
@@ -91,13 +91,16 @@ public class ScreenShotApp extends JFrame {
 		JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.add(scrollPane);
 				
-		timerButton.addActionListener(e ->{
-				popupMenu.show(timerButton,60,0);
-				});
-				
-		// add list selection listener to handle the selection of time intervals	
-		timeList.addListSelectionListener(event ->{
+		timerButton.addActionListener(e ->
+		{
+			popupMenu.show(timerButton,60,0);
 			
+		});
+				
+		// add list selection listener to handle the selection of time intervals
+		boolean[] isActive = {false};
+		
+		timeList.addListSelectionListener(event ->{
 			
 			if(!event.getValueIsAdjusting()) {
 				String selectedInterval = timeList.getSelectedValue();
@@ -107,14 +110,20 @@ public class ScreenShotApp extends JFrame {
 					timerButton.setToolTipText("selected interval:"+ selectedInterval);
 					System.out.println("Screenshot interval:"+selectedInterval);
 					
-							//close the popup menu
+					if(isActive[0]) {
+						System.out.println("New snapshot interval selected..");
+						restartTimer();
+					}
+					
+					//close the popup menu
 					popupMenu.setVisible(false);
 						}
 					}
 				});
-				
-		boolean[] isActive = {false};
 		
+		
+		
+
 		//adding action listener to start button to change its icon.
 		startButton.addActionListener(e->
 		{
@@ -128,7 +137,6 @@ public class ScreenShotApp extends JFrame {
 				
 				
 			screenshotTimer = new Timer();
-		
 			screenshotTimer.scheduleAtFixedRate(new TimerTask() {
 
 				@Override
@@ -162,6 +170,7 @@ public class ScreenShotApp extends JFrame {
 				}
 				
 				isActive[0]=false;
+				screenshotCounter=1;
 			}
 		});
 		
@@ -184,14 +193,14 @@ public class ScreenShotApp extends JFrame {
 				BufferedImage screenshot = robot.createScreenCapture(screenRect); //captures the screenarea defined by screenrect
 				//																	and stored as a bufferedImage object
 			
-				String folderPath = "C:\\Users\\2021603\\Desktop\\snapShots\\";
+				String folderPath = "src\\snapShots\\";
 				String fileName = "screenshot_" +screenshotCounter+".png";
 				File file = new File(folderPath+fileName);
 				ImageIO.write(screenshot, "png", file);
 				System.out.println("Screen captured");
 				System.out.println("Screenshot saved: "+file.getAbsolutePath());
 			
-			//JOptionPane.showMessageDialog(null, "Screenshot saved: "+file.getAbsolutePath());
+				//JOptionPane.showMessageDialog(null, "Screenshot saved: "+file.getAbsolutePath());
 			
 				screenshotCounter++;
 			
@@ -203,5 +212,28 @@ public class ScreenShotApp extends JFrame {
 
 		
 	}
+		
+		private void restartTimer() {
+			
+			if(screenshotTimer!=null) {
+				screenshotTimer.cancel();
+			}
+			screenshotTimer = new Timer();
+			screenshotTimer.scheduleAtFixedRate(new TimerTask() {
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					takeScreenshot();
+				}
+				
+			}, 0, interval);
+			
+			System.out.println("Timer restarted with new interval: "+interval/1000+" seconds");
+		
+	
+		}	
+		
+		
 	}
 
