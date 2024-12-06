@@ -15,6 +15,7 @@ public class ScreenShotApp extends JFrame {
 	
 	private static int screenshotCounter = 1;
 	private Timer screenshotTimer;
+	private int interval =2000; //default interval
 	
 	public ScreenShotApp() {
 		
@@ -62,7 +63,6 @@ public class ScreenShotApp extends JFrame {
 		add(endButton);
 		
 		// timer Button
-
 		int timerButtonWidth =  75;
 		int timerButtonHeight = 80;
 		
@@ -97,12 +97,16 @@ public class ScreenShotApp extends JFrame {
 				
 		// add list selection listener to handle the selection of time intervals	
 		timeList.addListSelectionListener(event ->{
-			if(! event.getValueIsAdjusting()) {
+			
+			
+			if(!event.getValueIsAdjusting()) {
 				String selectedInterval = timeList.getSelectedValue();
 						
 				if(selectedInterval != null) {
+					interval = Integer.parseInt(selectedInterval)*1000;
 					timerButton.setToolTipText("selected interval:"+ selectedInterval);
-					System.out.println(selectedInterval);
+					System.out.println("Screenshot interval:"+selectedInterval);
+					
 							//close the popup menu
 					popupMenu.setVisible(false);
 						}
@@ -124,7 +128,7 @@ public class ScreenShotApp extends JFrame {
 				
 				
 			screenshotTimer = new Timer();
-			
+		
 			screenshotTimer.scheduleAtFixedRate(new TimerTask() {
 
 				@Override
@@ -133,12 +137,11 @@ public class ScreenShotApp extends JFrame {
 					takeScreenshot();
 				}
 				
-			}, 0, 2000);
+			}, 0, interval);
 			
 			isActive[0] = true; //start button is active now
 		
 			}
-		
 			else {
 				System.out.println("Start button is already active.");
 			}
@@ -161,41 +164,42 @@ public class ScreenShotApp extends JFrame {
 				isActive[0]=false;
 			}
 		});
+		
 			setLocation(1050, 650);
 			//setLocationRelativeTo(null);
 			setVisible(true);
 			//setIconImage(scaledStartImage);
 	}
 	
-	private void takeScreenshot() {
+		private void takeScreenshot() {
 				
-		try {
-			Robot robot = new Robot(); //interface to interact with the screen
+			try {
+				Robot robot = new Robot(); //interface to interact with the screen
+				
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //provides access to the systems graphical environment.
+				//getScreenSize() would fetch the dimensions of the entire screen.
 			
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //provides access to the systems graphical environment.
-			//getScreenSize() would fetch the dimensions of the entire screen.
+				Rectangle screenRect = new Rectangle(screenSize); //Rectangle class is used to define a rectangular region.
 			
-			Rectangle screenRect = new Rectangle(screenSize); //Rectangle class is used to define a rectangular region.
+				BufferedImage screenshot = robot.createScreenCapture(screenRect); //captures the screenarea defined by screenrect
+				//																	and stored as a bufferedImage object
 			
-			BufferedImage screenshot = robot.createScreenCapture(screenRect); //captures the screenarea defined by screenrect
-			//																	and stored as a bufferedImage object
-			
-			String folderPath = "C:\\Users\\2021603\\Desktop\\snapShots\\";
-			String fileName = "screenshot_" +screenshotCounter+".png";
-			File file = new File(folderPath+fileName);
-			ImageIO.write(screenshot, "png", file);
-			System.out.println("Screen captured");
-			System.out.println("Screenshot saved: "+file.getAbsolutePath());
+				String folderPath = "C:\\Users\\2021603\\Desktop\\snapShots\\";
+				String fileName = "screenshot_" +screenshotCounter+".png";
+				File file = new File(folderPath+fileName);
+				ImageIO.write(screenshot, "png", file);
+				System.out.println("Screen captured");
+				System.out.println("Screenshot saved: "+file.getAbsolutePath());
 			
 			//JOptionPane.showMessageDialog(null, "Screenshot saved: "+file.getAbsolutePath());
 			
-			screenshotCounter++;
+				screenshotCounter++;
 			
-		}
-		catch(Exception ex){
-			ex.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
-		}
+			}
+			catch(Exception ex){
+				ex.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
+			}
 
 		
 	}
