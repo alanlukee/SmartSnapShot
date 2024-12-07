@@ -158,22 +158,27 @@ public class ScreenShotApp extends JFrame {
 		
 		//adding action listener to stop button---> to restore the start button icon.
 		
-		endButton.addActionListener(e->
-		
+		endButton.addActionListener(e ->
 		{
-			if(isActive[0]){
-				startButton.setIcon(scaledStartIcon);
-				System.out.println("Snapshot stopped");
-				endButton.setEnabled(false);
-				
-				if(screenshotTimer!=null){
-					screenshotTimer.cancel();
-				}
-				
-				isActive[0]=false;
-				screenshotCounter=1;
-			}
+		    if (isActive[0]) {
+		        startButton.setIcon(scaledStartIcon);
+		        System.out.println("Snapshot stopped");
+		        endButton.setEnabled(false);
+
+		        if (screenshotTimer != null) {
+		            screenshotTimer.cancel();
+		        }
+
+		        isActive[0] = false;
+		        screenshotCounter = 1;
+
+		        // Launch the previewer
+		        ScreenShotPreviewer previewer = new ScreenShotPreviewer();
+	            previewer.setVisible(true);
+
+		    }
 		});
+
 		
 			setLocation(1050, 650);
 			//setLocationRelativeTo(null);
@@ -197,7 +202,7 @@ public class ScreenShotApp extends JFrame {
 				BufferedImage screenshot = robot.createScreenCapture(screenRect); //captures the screenarea defined by screenrect
 				//																	and stored as a bufferedImage object
 			
-				String folderPath = "src\\snapShots\\";
+				String folderPath = "src/snapShots/";
 				String fileName = "screenshot_" +screenshotCounter+".png";
 				File file = new File(folderPath+fileName);
 				ImageIO.write(screenshot, "png", file);
@@ -222,15 +227,16 @@ public class ScreenShotApp extends JFrame {
 			flashWindow.setBackground(new Color(255,255,255,150));
 			flashWindow.setBounds(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
 			flashWindow.setAlwaysOnTop(true);
-			
-
 			flashWindow.setVisible(true);
+			
 			try {
 				Thread.sleep(70);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			
 			flashWindow.dispose();
 			
 			}
@@ -241,6 +247,7 @@ public class ScreenShotApp extends JFrame {
 				screenshotTimer.cancel();
 			}
 			screenshotTimer = new Timer();
+			
 			screenshotTimer.scheduleAtFixedRate(new TimerTask() {
 
 				@Override
@@ -254,4 +261,3 @@ public class ScreenShotApp extends JFrame {
 			System.out.println("Timer restarted with new interval: "+interval/1000+" seconds");
 		}		
 	}
-
