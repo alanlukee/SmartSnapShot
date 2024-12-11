@@ -1,0 +1,115 @@
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ImageToPDF {
+    private JPanel imagePanel = new JPanel();
+    private List<File> selectedFiles = new ArrayList<>();
+
+    public void addImage(File file) {
+        try {
+            JPanel imageContainer = new JPanel(new BorderLayout());
+            JLabel imageLabel = new JLabel(new ImageIcon(file.getAbsolutePath()));
+            JCheckBox checkBox = new JCheckBox();
+
+            imageContainer.add(imageLabel, BorderLayout.CENTER);
+            imageContainer.add(checkBox, BorderLayout.SOUTH);
+
+            imageLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    checkBox.setSelected(!checkBox.isSelected());
+                    if (checkBox.isSelected()) {
+                        selectedFiles.add(file);
+                    } else {
+                        selectedFiles.remove(file);
+                    }
+                }
+            });
+
+            checkBox.addActionListener(e -> {
+                if (checkBox.isSelected()) {
+                    selectedFiles.add(file);
+                } else {
+                    selectedFiles.remove(file);
+                }
+            });
+
+            imagePanel.add(imageContainer);
+            imagePanel.add(Box.createVerticalStrut(15)); // to add spacing between the images
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void createAndShowGUI() {
+        JFrame frame = new JFrame("Image to PDF Converter");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+
+        imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(imagePanel);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        JButton exportButton = new JButton("Export to PDF");
+        exportButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                exportToPDF();
+            }
+        });
+
+        frame.add(exportButton, BorderLayout.SOUTH);
+
+        frame.setVisible(true);
+    }
+
+    private void exportToPDF() {
+        if (selectedFiles.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No images selected!");
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save PDF");
+        fileChooser.setSelectedFile(new File("output.pdf"));
+        int userSelection = fileChooser.showSaveDialog(null);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File pdfFile = fileChooser.getSelectedFile();
+            try {
+                Document document = new Document();
+                PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+                document.open();
+
+                for (File imageFile : selectedFiles) {
+                    Image image = Image.getInstance(imageFile.getAbsolutePath());
+                    image.scaleToFit(500, 500); // Scale images to fit the page
+                    document.add(image);
+                }
+
+                document.close();
+                JOptionPane.showMessageDialog(null, "PDF exported successfully!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error while exporting PDF: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        ImageToPDF imageToPDF = new ImageToPDF();
+        imageToPDF.createAndShowGUI();
+    }
+}
