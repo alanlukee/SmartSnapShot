@@ -1,0 +1,128 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfWriter;
+
+public class ImageToPDFConverter {
+    private JPanel imagePanel;
+    private ArrayList<File> selectedFiles = new ArrayList<>();
+    private ArrayList<JCheckBox> checkBoxes = new ArrayList<>();
+
+    public ImageToPDFConverter() {
+        JFrame frame = new JFrame("Image to PDF Converter");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+
+        imagePanel = new JPanel();
+        imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane = new JScrollPane(imagePanel);
+
+        JPanel buttonPanel = new JPanel();
+        JButton selectAllButton = new JButton("Select All");
+        JButton exportButton = new JButton("Export to PDF");
+
+        buttonPanel.add(selectAllButton);
+        buttonPanel.add(exportButton);
+
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Example: Adding dummy image paths for demonstration
+        for (int i = 1; i <= 5; i++) {
+            try {
+                JPanel imageContainer = new JPanel(new BorderLayout());
+                JLabel imageLabel = new JLabel("Image " + i); // Replace with actual image thumbnails
+                JCheckBox checkBox = new JCheckBox();
+                File file = new File("Image" + i + ".jpg"); // Replace with actual file references
+
+                checkBoxes.add(checkBox); // Add checkbox to the list
+
+                imageContainer.add(imageLabel, BorderLayout.CENTER);
+                imageContainer.add(checkBox, BorderLayout.SOUTH);
+
+                imageLabel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        checkBox.setSelected(!checkBox.isSelected());
+                        if (checkBox.isSelected()) {
+                            selectedFiles.add(file);
+                        } else {
+                            selectedFiles.remove(file);
+                        }
+                    }
+                });
+
+                checkBox.addActionListener(e -> {
+                    if (checkBox.isSelected()) {
+                        selectedFiles.add(file);
+                    } else {
+                        selectedFiles.remove(file);
+                    }
+                });
+
+                imagePanel.add(imageContainer);
+                imagePanel.add(Box.createVerticalStrut(15)); // Add spacing between the images
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        // Action for "Select All" Button
+        selectAllButton.addActionListener(e -> {
+            selectedFiles.clear();
+            for (JCheckBox checkBox : checkBoxes) {
+                checkBox.setSelected(true); // Select all checkboxes
+                File file = new File("Image" + (checkBoxes.indexOf(checkBox) + 1) + ".jpg"); // Replace with actual file references
+                if (!selectedFiles.contains(file)) {
+                    selectedFiles.add(file); // Add corresponding file to selectedFiles
+                }
+            }
+        });
+
+        // Action for "Export to PDF" Button
+        exportButton.addActionListener(e -> {
+            if (selectedFiles.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "No images selected!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save PDF");
+            int userSelection = fileChooser.showSaveDialog(frame);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File pdfFile = fileChooser.getSelectedFile();
+                if (!pdfFile.getName().endsWith(".pdf")) {
+                    pdfFile = new File(pdfFile.getAbsolutePath() + ".pdf");
+                }
+
+                try {
+                    Document document = new Document();
+                    PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+                    document.open();
+
+                    for (File imageFile : selectedFiles) {
+                        Image image = Image.getInstance(imageFile.getAbsolutePath());
+                        image.scaleToFit(500, 500); // Adjust image size if necessary
+                        document.add(image);
+                    }
+
+                    document.close();
+                    JOptionPane.showMessageDialog(frame, "PDF created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(frame, "Failed to create PDF!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        frame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(ImageToPDFConverter::new);
+    }
+}
