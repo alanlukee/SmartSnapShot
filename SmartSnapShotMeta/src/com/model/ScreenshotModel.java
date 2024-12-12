@@ -19,6 +19,7 @@ public class ScreenshotModel {
 	private int interval = 2000;
 	private boolean isActive = false;
 	private boolean userDemandMode = false;
+	private String folderPath = "src\\main\\java\\snapShots";
 	
 	public boolean isActive() {
 		return isActive;
@@ -50,9 +51,10 @@ public class ScreenshotModel {
 			BufferedImage screenshot = robot.createScreenCapture(screenRect); 
 																				
 		
-			String folderPath = "src/snapShots/";
+			//String folderPath = "src/snapShots/";
 			String fileName = "screenshot_" +screenshotCounter+".png";
-			File file = new File(folderPath+fileName);
+			
+			File file = new File(folderPath+File.separator+fileName);
 			ImageIO.write(screenshot, "png", file);
 			System.out.println("Screen captured");
 			System.out.println("Screenshot saved: "+file.getAbsolutePath());
@@ -89,7 +91,8 @@ public class ScreenshotModel {
 	
 		public ArrayList<File> getScreenShots() {
 
-			String folderPath = "src/snapShots/";
+			//String folderPath = "src/snapShots/";
+			
 			File folder = new File(folderPath);
 			ArrayList<File> screenshotFiles = new ArrayList<>();
 			if (folder.exists() && folder.isDirectory()) {
@@ -116,6 +119,14 @@ public class ScreenshotModel {
 
 	public void setUserDemandMode(boolean userDemandMode) {
 		this.userDemandMode = userDemandMode;
+	}
+
+	public String getFolderPath() {
+		return folderPath;
+	}
+
+	public void setFolderPath(String folderPath) {
+		this.folderPath = folderPath;
 	}
 
 }
