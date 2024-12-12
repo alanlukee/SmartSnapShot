@@ -29,6 +29,7 @@ public class ScreenshotController {
 	private ButtonsBar buttonsBar;
 	private PreviewWindow previewWindow;
 	private Timer screenshotTimer;
+	JFileChooser folderChooser;
 
 	JWindow popupFrame ;
 
@@ -62,7 +63,20 @@ public class ScreenshotController {
 	private void startScreenShotProcess() {
 
 		if(!model.isActive()) {
-			System.out.println("check-1");
+			//System.out.println("check-1");
+			
+			folderChooser = new JFileChooser();
+			folderChooser.setFileSelectionMode(folderChooser.DIRECTORIES_ONLY);
+			int result = folderChooser.showOpenDialog(null);
+			
+			if(result ==JFileChooser.APPROVE_OPTION) {
+				String selectedFolder = folderChooser.getSelectedFile().getAbsolutePath();
+				model.setFolderPath(selectedFolder);
+				System.out.println("Screenshots will be saved to :"+selectedFolder);
+			}
+			else {
+				JOptionPane.showMessageDialog(null, "No folder selected. Default folder will be used.", "Warning",JOptionPane.WARNING_MESSAGE);
+			}
 			model.setActive(true);
 			
 			if(model.isUserDemandMode()) {
@@ -97,7 +111,7 @@ public class ScreenshotController {
 				popupFrame.setVisible(true);
 				popupFrame.setLocation(1200,200);
 				
-				ImageIcon activeIcon = new ImageIcon("src/assets/snapshot_icon.png");
+				ImageIcon activeIcon = new ImageIcon("src\\main\\java\\assets\\snapshot_icon.png");
 				Image scaledActiveImage = activeIcon.getImage().getScaledInstance(50, 50,  Image.SCALE_SMOOTH);
 				ImageIcon scaledActiveIcon = new ImageIcon(scaledActiveImage);
 				
@@ -115,7 +129,7 @@ public class ScreenshotController {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						// TODO Auto-generated method stub
-						ImageIcon activeIcon = new ImageIcon("src/assets/snapshot_active.png");
+						ImageIcon activeIcon = new ImageIcon("src\\main\\java\\assets\\snapshot_active.png");
 						Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85, Image.SCALE_SMOOTH);
 
 					
@@ -145,7 +159,7 @@ public class ScreenshotController {
 			buttonsBar.setActiveButtonIcon();
 			buttonsBar.enableStopButon(true);
 
-			ImageIcon activeIcon = new ImageIcon("src/assets/snapshot_active.png");
+			ImageIcon activeIcon = new ImageIcon("src\\main\\java\\assets\\snapshot_active.png");
 			Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85, Image.SCALE_SMOOTH);
 
 			SwingUtilities.invokeLater(() -> {
@@ -167,7 +181,7 @@ public class ScreenshotController {
 					;
 				}
 
-			}, 0, model.getInterval());
+			}, 1000, model.getInterval());
 
 		} else {
 			System.out.println("Start button is already active.");
