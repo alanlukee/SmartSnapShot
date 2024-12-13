@@ -217,6 +217,7 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.JobAttributes;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -240,7 +241,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 
 public class PreviewWindow extends JFrame {
@@ -389,6 +393,15 @@ public class PreviewWindow extends JFrame {
             JOptionPane.showMessageDialog(null, "No images selected!");
             return;
         }
+        // Promoting user for heading
+        
+        String headingText = JOptionPane.showInputDialog(null,"Enter the heading for the PDF:","PDF Heading",JOptionPane.PLAIN_MESSAGE);;
+       
+        // if no user input use default heading
+        
+        if(headingText == null || headingText.trim().isEmpty()) {
+        	headingText = "Test Results";
+        }
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Save PDF");
@@ -402,12 +415,25 @@ public class PreviewWindow extends JFrame {
                 Document document = new Document();
                 PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
                 document.open();
+                
+                
+                // adding the user provided heading to the pdf
+                Paragraph heading = new Paragraph(headingText,FontFactory.getFont(FontFactory.HELVETICA,18,BaseColor.BLACK));
+                heading.setAlignment(Paragraph.ALIGN_CENTER);
+                document.add(heading);
+                document.add(new Paragraph(" "));
+                
+                
                 for (File imageFile : selectedFiles) {
                     com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imageFile.getAbsolutePath());
                     System.out.println(imageFile.getAbsolutePath());
                     image.scaleToFit(500, 500);
                     document.add(image);
+                    
+                    // spacing between screenshots in pdf
+                    document.add(new Paragraph(" "));
                 }
+                
                 document.close();
                 JOptionPane.showMessageDialog(this, "PDF exported successfully!");
 
