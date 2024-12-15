@@ -1,11 +1,9 @@
 package com.controller;
 
-import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,6 +17,7 @@ import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
 import com.model.ScreenshotModel;
+import com.utils.Constants;
 import com.view.ButtonsBar;
 import com.view.ButtonsListener;
 import com.view.PreviewWindow;
@@ -31,7 +30,7 @@ public class ScreenshotController {
 	private Timer screenshotTimer;
 	JFileChooser folderChooser;
 
-	JWindow popupFrame ;
+	JWindow popupFrame;
 
 	public ScreenshotController(ButtonsBar buttonsBar) {
 
@@ -62,86 +61,79 @@ public class ScreenshotController {
 
 	private void startScreenShotProcess() {
 
-		if(!model.isActive()) {
-		
+		if (!model.isActive()) {
+
 			folderChooser = new JFileChooser();
-			folderChooser.setFileSelectionMode(folderChooser.DIRECTORIES_ONLY);
+			folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int result = folderChooser.showOpenDialog(null);
-			
-			if(result ==JFileChooser.APPROVE_OPTION) {
+
+			if (result == JFileChooser.APPROVE_OPTION) {
 				String selectedFolder = folderChooser.getSelectedFile().getAbsolutePath();
 				model.setFolderPath(selectedFolder);
-				System.out.println("Screenshots will be saved to :"+selectedFolder);
+				System.out.println("Screenshots will be saved to :" + selectedFolder);
 				model.setActive(true);
+			} else {
+
+				int userChoice = JOptionPane.showConfirmDialog(null,
+						"No folder selected, Do ypu want to save it in default folder?", "Confirmation",
+						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+				if (userChoice == JOptionPane.YES_OPTION) {
+					model.setActive(true);
+				} else {
+					System.out.println("USER Do not want to proceed..");
+				}
+
 			}
-			else {
-		
-				int userChoice = JOptionPane.showConfirmDialog( null,
-						"No folder selected, Do ypu want to save it in default folder?",
-						"Confirmation",
-						JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE);
-			
-			if( userChoice==JOptionPane.YES_OPTION ) {
-				model.setActive(true);
-			}
-			else {
-				System.out.println("Do not want to proceed..");
-			}
-			
-			}
-		
-			if(model.isUserDemandMode()) {
-				
+
+			if (model.isUserDemandMode()) {
+
 				startUserDemandMode();
-			}
-			else {
-				System.out.println("nice");
+				
+			} else {
+				
 				startTimerMode();
 			}
-		}
-		else {
-			System.out.println("check-2");
-			System.out.println("Start button is already gsdfs active");
+		} else {
+
+			System.out.println("Start button is already active");
 		}
 	}
-	
+
 	private void startUserDemandMode() {
 		System.out.println("User demand mode activated");
 		buttonsBar.setActiveButtonIcon();
 		buttonsBar.enableStopButon(true);
-	
-		
+
 		SwingUtilities.invokeLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				
+
 				popupFrame = new JWindow();
-				popupFrame.setSize(50,50);
+				popupFrame.setSize(50, 50);
 				popupFrame.setVisible(true);
-				popupFrame.setLocation(1200,200);
-				
-				ImageIcon activeIcon = new ImageIcon("src\\main\\java\\assets\\snapshot_icon.png");
-				Image scaledActiveImage = activeIcon.getImage().getScaledInstance(50, 50,  Image.SCALE_SMOOTH);
-				ImageIcon scaledActiveIcon = new ImageIcon(scaledActiveImage);
-				
-				
-				JButton takeScreenShotButton = new JButton(scaledActiveIcon);
+				popupFrame.setLocation(1200, 200);
+
+				ImageIcon cameraIcon = new ImageIcon(Constants.CAMERA_ICON_PATH);
+				Image scaledCameraImage = cameraIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+				ImageIcon scaledCameraIcon = new ImageIcon(scaledCameraImage);
+
+				JButton takeScreenShotButton = new JButton(scaledCameraIcon);
 				takeScreenShotButton.setBorder(BorderFactory.createEmptyBorder());
 				popupFrame.add(takeScreenShotButton);
 				popupFrame.setVisible(true);
 				popupFrame.setAlwaysOnTop(true);
 				popupFrame.toFront();
 				popupFrame.requestFocus();
-				
+
 				takeScreenShotButton.addActionListener(new ActionListener() {
-					
+
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						// TODO Auto-generated method stub
-						ImageIcon activeIcon = new ImageIcon("src\\main\\java\\assets\\snapshot_active.png");
+						ImageIcon activeIcon = new ImageIcon(Constants.ACTIVE_ICON_PATH);
 						Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85, Image.SCALE_SMOOTH);
 
 						JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(buttonsBar);
@@ -155,7 +147,7 @@ public class ScreenshotController {
 						popupFrame.setAlwaysOnTop(true);
 						popupFrame.toFront();
 						popupFrame.requestFocus();
-						
+
 					}
 				});
 			}
@@ -165,12 +157,11 @@ public class ScreenshotController {
 	private void startTimerMode() {
 		if (model.isActive()) {
 			System.out.println("Snapshot functionality initiated.");
-			
-			
+
 			buttonsBar.setActiveButtonIcon();
 			buttonsBar.enableStopButon(true);
 
-			ImageIcon activeIcon = new ImageIcon("src\\main\\java\\assets\\snapshot_active.png");
+			ImageIcon activeIcon = new ImageIcon(Constants.ACTIVE_ICON_PATH);
 			Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85, Image.SCALE_SMOOTH);
 
 			SwingUtilities.invokeLater(() -> {
@@ -199,20 +190,18 @@ public class ScreenshotController {
 		}
 	}
 
-	
-
 	private void stopScreenShotProcess() {
 
 		if (model.isActive()) {
-			
-			if(model.isUserDemandMode()) {
+
+			if (model.isUserDemandMode()) {
 				model.setUserDemandMode(false);
-					
+
 				model.setActive(false);
 				buttonsBar.setStartButtonIcon();
 				buttonsBar.enableStopButon(false);
 				popupFrame.setVisible(false);
-					
+
 				SwingUtilities.invokeLater(new Runnable() {
 
 					@Override
@@ -221,9 +210,9 @@ public class ScreenshotController {
 						System.out.println("Opening preview window");
 						openPreviewWindow();
 					}
-				});		
+				});
 			}
-			
+
 			else {
 				System.out.println("SnapShot stopped");
 				model.setActive(false);
@@ -244,37 +233,36 @@ public class ScreenshotController {
 						System.out.println("Opening preview window");
 
 						openPreviewWindow();
-						System.out.println("close");
+						
 					}
-				});	
+				});
 			}
 		}
 	}
 
 	private void timerProcess() {
 
-		String[] options = { "User demand", "Time interval" };
 		String selectedOption = (String) JOptionPane.showInputDialog(null, "Choose timer mode", "Timer mode selection",
-				JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+				JOptionPane.PLAIN_MESSAGE, null, Constants.TIMER_OPTIONS, Constants.TIMER_OPTIONS[0]);
 
 		if (selectedOption != null) {
 			switch (selectedOption) {
 
 			case ("Time interval"):
 				timeIntervalMode();
-			break;
+				break;
 
-			case("User demand"):
+			case ("User demand"):
 				userDemandMode();
-			break;
-			
+				break;
+
 			default:
-				JOptionPane.showMessageDialog(null, "Invalid option selected", "Error",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Invalid option selected", "Error", JOptionPane.ERROR_MESSAGE);
 				break;
 			}
 		}
 	}
-	
+
 	private void userDemandMode() {
 		System.out.println("Clicked user demand");
 		model.setUserDemandMode(true);
@@ -282,10 +270,9 @@ public class ScreenshotController {
 
 	private void timeIntervalMode() {
 
-		String[] options = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
-
 		String selected = (String) JOptionPane.showInputDialog(null, "Select timer interval (seconds):", "Set Timer",
-				JOptionPane.PLAIN_MESSAGE, null, options, String.valueOf(model.getInterval() / 1000));
+				JOptionPane.PLAIN_MESSAGE, null, Constants.TIMER_INTERVAL_OPTIONS,
+				String.valueOf(model.getInterval() / 1000));
 
 		if (selected != null) {
 			try {
@@ -302,6 +289,7 @@ public class ScreenshotController {
 			}
 		}
 	}
+
 	private void restartTimer() {
 
 		if (screenshotTimer != null) {
@@ -323,7 +311,7 @@ public class ScreenshotController {
 	}
 
 	private void openPreviewWindow() {
-		
+
 		if (previewWindow == null || !previewWindow.isVisible()) {
 			previewWindow = new PreviewWindow(model.getScreenShots());
 			previewWindow.setVisible(true);
