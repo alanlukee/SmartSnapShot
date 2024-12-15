@@ -1,214 +1,3 @@
-//package com.view;
-//
-//import java.awt.BorderLayout;
-//import java.awt.Color;
-//import java.awt.Component;
-//import java.awt.Desktop;
-//import java.awt.Dimension;
-//import java.awt.Font;
-//import java.awt.Image;
-//import java.awt.event.MouseAdapter;
-//import java.awt.event.MouseEvent;
-//import java.awt.image.BufferedImage;
-//import java.io.File;
-//import java.io.FileOutputStream;
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//import javax.imageio.ImageIO;
-//import javax.swing.BorderFactory;
-//import javax.swing.Box;
-//import javax.swing.BoxLayout;
-//import javax.swing.ImageIcon;
-//import javax.swing.JButton;
-//import javax.swing.JCheckBox;
-//import javax.swing.JFileChooser;
-//import javax.swing.JFrame;
-//import javax.swing.JLabel;
-//import javax.swing.JOptionPane;
-//import javax.swing.JPanel;
-//import javax.swing.JScrollPane;
-//import javax.swing.SwingConstants;
-//
-//import com.itextpdf.text.Document;
-//import com.itextpdf.text.pdf.PdfWriter;
-//
-//public class PreviewWindow extends JFrame {
-//
-//    private JPanel imagePanel;
-//    private List<File>  selectedFiles ;
-//    private ArrayList<JCheckBox> checkBoxes = new ArrayList<JCheckBox>();
-//    
-//    private JButton selectAllButton = new JButton("Select All");
-//    
-//    public PreviewWindow(ArrayList<File> screenshots) {
-//    	
-//        setTitle("Preview Window");
-//        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
-//        setSize(1000, 600);
-//        setLocationRelativeTo(null);
-//
-//        imagePanel = new JPanel();
-//        imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS)); 
-//        imagePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); 
-//
-//        JScrollPane scrollPane = new JScrollPane(imagePanel);
-//        add(scrollPane, BorderLayout.CENTER);
-//
-//        loadImages(screenshots);  
-//    }
-//    
-//       public void refresh(ArrayList<File> screenshots) {
-//    	 loadImages(screenshots);
-//    }
-//    
-//    private void loadImages(ArrayList<File> screenshots) {
-//    	imagePanel.removeAll();
-//    	if(screenshots.isEmpty()) {
-//    		JOptionPane.showMessageDialog(this, "No images found!", "Info", JOptionPane.INFORMATION_MESSAGE);
-//    	}
-//    	else {
-//    		for(File file: screenshots) {
-//    			addImageToPanel(file);
-//    		}
-//    	}
-//    }
-//
-//    private void addImageToPanel(File file) {
-//        try {
-//            BufferedImage bufferedImage = ImageIO.read(file);
-//            if (bufferedImage == null) {
-//                System.out.println("Failed to load image: " + file.getAbsolutePath());
-//                return;
-//            }
-//
-//            int windowWidth = getWidth() - 40; 
-//            int scaledHeight = (bufferedImage.getHeight() * windowWidth) / bufferedImage.getWidth();
-//            Image scaledImage = bufferedImage.getScaledInstance(windowWidth, scaledHeight, Image.SCALE_SMOOTH);
-//            ImageIcon icon = new ImageIcon(scaledImage);
-//            
-//            JLabel imageLabel = new JLabel(icon);
-//            imageLabel.setIcon(new ImageIcon(scaledImage));
-//
-//            JCheckBox checkBox = new JCheckBox(file.getName());
-//            checkBox.setFont(new Font("Arial", Font.BOLD, 14));
-//            checkBox.setHorizontalAlignment(SwingConstants.CENTER);
-//            checkBox.setPreferredSize(new Dimension(windowWidth, 30));
-//
-//            JPanel imageContainer = new JPanel();
-//            imageContainer.setLayout(new BorderLayout());
-//            imageContainer.setBorder(BorderFactory.createCompoundBorder(
-//                    BorderFactory.createLineBorder(Color.GRAY, 1),
-//                    BorderFactory.createEmptyBorder(10, 10, 10, 10)
-//            ));
-//            
-//            imageContainer.setBackground(new Color(240, 248, 255)); //light blue
-//
-//            imageContainer.add(imageLabel, BorderLayout.CENTER);
-//            imageContainer.add(checkBox, BorderLayout.SOUTH);
-//            
-//            selectedFiles = new ArrayList<>() ;
-//
-//            imageLabel.addMouseListener(new MouseAdapter() {
-//                @Override
-//                public void mouseClicked(MouseEvent e) {
-//                    checkBox.setSelected(!checkBox.isSelected());
-//                    if (checkBox.isSelected()) {
-//                        selectedFiles.add(file);
-//                    } else {
-//                        selectedFiles.remove(file);
-//                    }
-//                }
-//            });
-//
-//            checkBox.addActionListener(e -> {
-//                if (checkBox.isSelected()) {
-//                    selectedFiles.add(file);
-//                } else {
-//                    selectedFiles.remove(file);
-//                }
-//            });
-//
-//            imagePanel.add(imageContainer);
-//            imagePanel.add(Box.createVerticalStrut(15)); //to add spacing between the images
-//            
-//            JButton exportButton = new JButton("Export-To-PDF");
-//            // adding action listener to export button
-//            
-//            exportButton.addActionListener(e ->{
-//            	if(selectedFiles.isEmpty()) {
-//            		JOptionPane.showMessageDialog(null, "No images selected!");
-//            		return;
-//            	}
-//            	
-//            	JFileChooser fileChooser = new JFileChooser();
-//            	fileChooser.setDialogTitle("Save PDF");
-//            	fileChooser.setSelectedFile(new File("fileName.pdf"));
-//            	int userSelection = fileChooser.showSaveDialog(null);
-//            	
-//            	if(userSelection == JFileChooser.APPROVE_OPTION) {
-//            		File pdfFile = fileChooser.getSelectedFile();
-//            		
-//            		try {
-//            			Document document = new Document();
-//            			PdfWriter.getInstance(document,new FileOutputStream(pdfFile));
-//            			document.open();
-//            			for(File imageFile : selectedFiles) {
-//            				com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imageFile.getAbsolutePath());
-//            				image.scaleToFit(500,500);
-//            				document.add(image);
-//            			}
-//            			document.close();
-//            			JOptionPane.showMessageDialog(this, "PDF exported succesfully!");
-//            			
-//            			// opening the pdf
-//            			
-//            			if(Desktop.isDesktopSupported()) {
-//            				Desktop.getDesktop().browse(pdfFile.toURI());
-//            			} else {
-//            				JOptionPane.showMessageDialog(this, "Desktop operations are not supported on this system");
-//            			}
-//            		} catch(Exception ex) {
-//            			JOptionPane.showMessageDialog(this, "Error while exporting to PDF!"+ex.getMessage());
-//            		}
-//            	}
-//            });
-//            
-//            //JButton selectAllButton = new JButton("Select All");
-//            // adding action listener to select all button
-//            selectAllButton.addActionListener(e -> {
-//            	selectedFiles.clear();
-//            	Component[] components = imagePanel.getComponents();
-//            		for(Component component : components) {
-//            			if(component instanceof JPanel) {
-//            				JPanel imageContainer1 = (JPanel) component;
-//            				for(Component subComponent : imageContainer1.getComponents()) {
-//            					if(subComponent instanceof JCheckBox) {
-//            						JCheckBox checkBox1 = (JCheckBox) subComponent;
-//            						//if(!checkBox1.isSelected()) {
-//            							 checkBox1.setSelected(true);
-//            						//}
-//            						if(checkBox1.getClientProperty("file") instanceof File) {
-//            							File imageFile = (File) checkBox1.getClientProperty("file");
-//            								if(!selectedFiles.contains(imageFile)) {
-//            									selectedFiles.add(imageFile);
-//            								}
-//            						}
-//            					}
-//            				}
-//            			}
-//            		}
-//            	});
-//            
-//            // adding export and selectAll buttons to frame
-//            add(exportButton,BorderLayout.SOUTH);
-//            add(selectAllButton,BorderLayout.NORTH);
-//            
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//    }
-//}
 package com.view;
 
 import java.awt.BorderLayout;
@@ -217,7 +6,6 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
-import java.awt.JobAttributes;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -241,210 +29,181 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
-import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.utils.Constants;
 
 public class PreviewWindow extends JFrame {
 
-    private JPanel imagePanel;
-    private List<File> selectedFiles = new ArrayList<>();
-    private ArrayList<JCheckBox> checkBoxes = new ArrayList<>();
-    private JButton selectAllButton = new JButton("Select All");
+	private JPanel imagePanel;
+	private List<File> selectedFiles = new ArrayList<>();
+	private ArrayList<JCheckBox> checkBoxes = new ArrayList<>();
+	private JButton selectAllButton = new JButton("Select All");
 
-    public PreviewWindow(ArrayList<File> screenshots) {
+	public PreviewWindow(ArrayList<File> screenshots) {
 
-        setTitle("Preview Window");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(1000, 600);
-        setLocationRelativeTo(null);
+		setTitle("Preview Window");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setSize(1000, 600);
+		setLocationRelativeTo(null);
 
-        imagePanel = new JPanel();
-        imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));
-        imagePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		imagePanel = new JPanel();
+		imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));
+		imagePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JScrollPane scrollPane = new JScrollPane(imagePanel);
-        add(scrollPane, BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane(imagePanel);
+		add(scrollPane, BorderLayout.CENTER);
 
-        loadImages(screenshots);
+		loadImages(screenshots);
 
-        // Add the selectAllButton to the NORTH
-        add(selectAllButton, BorderLayout.NORTH);
+		add(selectAllButton, BorderLayout.NORTH);
 
-        // Add action listener for selectAllButton
-        selectAllButton.addActionListener(e -> selectAllImages(screenshots));
-    }
+		selectAllButton.addActionListener(e -> selectAllImages(screenshots));
+	}
 
-    public void refresh(ArrayList<File> screenshots) {
-        loadImages(screenshots);
-    }
+	public void refresh(ArrayList<File> screenshots) {
+		loadImages(screenshots);
+	}
 
-    private void loadImages(ArrayList<File> screenshots) {
-        imagePanel.removeAll();
-        checkBoxes.clear();
-        selectedFiles.clear();
+	private void loadImages(ArrayList<File> screenshots) {
+		imagePanel.removeAll();
+		checkBoxes.clear();
+		selectedFiles.clear();
 
-        if (screenshots.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No images found!", "Info", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            for (File file : screenshots) {
-                addImageToPanel(file);
-            }
-        }
-        imagePanel.revalidate();
-        imagePanel.repaint();
-    }
+		if (screenshots.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "No images found!", "Info", JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			for (File file : screenshots) {
+				addImageToPanel(file);
+			}
+		}
+		imagePanel.revalidate();
+		imagePanel.repaint();
+	}
 
-    private void addImageToPanel(File file) {
-        try {
-            BufferedImage bufferedImage = ImageIO.read(file);
-            if (bufferedImage == null) {
-                System.out.println("Failed to load image: " + file.getAbsolutePath());
-                return;
-            }
+	private void addImageToPanel(File file) {
+		try {
+			BufferedImage bufferedImage = ImageIO.read(file);
+			if (bufferedImage == null) {
+				System.out.println("Failed to load image: " + file.getAbsolutePath());
+				return;
+			}
 
-            int windowWidth = getWidth() - 40;
-            int scaledHeight = (bufferedImage.getHeight() * windowWidth) / bufferedImage.getWidth();
-            Image scaledImage = bufferedImage.getScaledInstance(windowWidth, scaledHeight, Image.SCALE_SMOOTH);
-            ImageIcon icon = new ImageIcon(scaledImage);
+			int windowWidth = getWidth() - 40;
+			int scaledHeight = (bufferedImage.getHeight() * windowWidth) / bufferedImage.getWidth();
+			Image scaledImage = bufferedImage.getScaledInstance(windowWidth, scaledHeight, Image.SCALE_SMOOTH);
+			ImageIcon icon = new ImageIcon(scaledImage);
 
-            JLabel imageLabel = new JLabel(icon);
+			JLabel imageLabel = new JLabel(icon);
 
-            JCheckBox checkBox = new JCheckBox(file.getName());
-            checkBox.setFont(new Font("Arial", Font.BOLD, 14));
-            checkBox.setHorizontalAlignment(SwingConstants.CENTER);
-            checkBox.setPreferredSize(new Dimension(windowWidth, 30));
+			JCheckBox checkBox = new JCheckBox(file.getName());
+			checkBox.setFont(new Font("Arial", Font.BOLD, 14));
+			checkBox.setHorizontalAlignment(SwingConstants.CENTER);
+			checkBox.setPreferredSize(new Dimension(windowWidth, 30));
 
-            JPanel imageContainer = new JPanel();
-            imageContainer.setLayout(new BorderLayout());
-            imageContainer.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(Color.GRAY, 1),
-                    BorderFactory.createEmptyBorder(10, 10, 10, 10)
-            ));
+			JPanel imageContainer = new JPanel();
+			imageContainer.setLayout(new BorderLayout());
+			imageContainer.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.GRAY, 1),
+					BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
-            imageContainer.setBackground(new Color(240, 248, 255));
+			imageContainer.setBackground(new Color(240, 248, 255));
 
-            imageContainer.add(imageLabel, BorderLayout.CENTER);
-            imageContainer.add(checkBox, BorderLayout.SOUTH);
+			imageContainer.add(imageLabel, BorderLayout.CENTER);
+			imageContainer.add(checkBox, BorderLayout.SOUTH);
 
-            // Add to checkbox list for "Select All" functionality
-            checkBoxes.add(checkBox);
+			// Add to checkbox list for "Select All" functionality
+			checkBoxes.add(checkBox);
 
-            // Add or remove files when checkbox state changes
-            
-            imageLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    checkBox.setSelected(!checkBox.isSelected());
-                    if (checkBox.isSelected()) {
-                        selectedFiles.add(file);
-                    } else {
-                        selectedFiles.remove(file);
-                    }
-                }
-            });
+			// Add or remove files when checkbox state changes
 
-            checkBox.addActionListener(e -> {
-                if (checkBox.isSelected()) {
-                    selectedFiles.add(file);
-                } else {
-                    selectedFiles.remove(file);
-                }
-            });
+			imageLabel.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					checkBox.setSelected(!checkBox.isSelected());
+					if (checkBox.isSelected()) {
+						selectedFiles.add(file);
+					} else {
+						selectedFiles.remove(file);
+					}
+				}
+			});
 
-            imagePanel.add(imageContainer);
-            imagePanel.add(Box.createVerticalStrut(15)); // Add spacing between images
+			checkBox.addActionListener(e -> {
+				if (checkBox.isSelected()) {
+					selectedFiles.add(file);
+				} else {
+					selectedFiles.remove(file);
+				}
+			});
 
-            // Add export button to SOUTH
-            JButton exportButton = new JButton("Export-To-PDF");
-            exportButton.addActionListener(e -> exportToPDF());
+			imagePanel.add(imageContainer);
+			imagePanel.add(Box.createVerticalStrut(15)); // Add spacing between images
 
-            add(exportButton, BorderLayout.SOUTH);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+			// Add export button to SOUTH
+			JButton exportButton = new JButton("Export-To-PDF");
+			exportButton.addActionListener(e -> exportToPDF());
 
-    private void selectAllImages(ArrayList<File> screenshots) {
+			add(exportButton, BorderLayout.SOUTH);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
 
-    	selectedFiles.clear();
-        for (File file : screenshots) {
-            if (!selectedFiles.contains(file)) {
-                selectedFiles.add(file);
-            }
-        }
+	private void selectAllImages(ArrayList<File> screenshots) {
 
-    	for(int i = 0; i<checkBoxes.size();i++) {
-    		
-    		JCheckBox checkBox = checkBoxes.get(i);
-    		System.out.println(checkBox.getText());
-    		if(!checkBox.isSelected()) {
-    			checkBox.setSelected(true);
-    		}
-    		
-    		
-    	}
-    }
+		selectedFiles.clear();
+		for (File file : screenshots) {
+			if (!selectedFiles.contains(file)) {
+				selectedFiles.add(file);
+			}
+		}
 
-    private void exportToPDF() {
-        if (selectedFiles.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No images selected!");
-            return;
-        }
-        // Promoting user for heading
-        
-        String headingText = JOptionPane.showInputDialog(null,"Enter the heading for the PDF:","PDF Heading",JOptionPane.PLAIN_MESSAGE);;
-       
-        // if no user input use default heading
-        
-        if(headingText == null || headingText.trim().isEmpty()) {
-        	headingText = "Test Results";
-        }
+		for (int i = 0; i < checkBoxes.size(); i++) {
 
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Save PDF");
-        fileChooser.setSelectedFile(new File("fileName.pdf"));
-        int userSelection = fileChooser.showSaveDialog(this);
+			JCheckBox checkBox = checkBoxes.get(i);
+			System.out.println(checkBox.getText());
+			if (!checkBox.isSelected()) {
+				checkBox.setSelected(true);
+			}
 
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File pdfFile = fileChooser.getSelectedFile();
+		}
+	}
 
-            try {
-                Document document = new Document();
-                PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
-                document.open();
-                
-                
-                // adding the user provided heading to the pdf
-                Paragraph heading = new Paragraph(headingText,FontFactory.getFont(FontFactory.HELVETICA,18,BaseColor.BLACK));
-                heading.setAlignment(Paragraph.ALIGN_CENTER);
-                document.add(heading);
-                document.add(new Paragraph(" "));
-                
-                
-                for (File imageFile : selectedFiles) {
-                    com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imageFile.getAbsolutePath());
-                    System.out.println(imageFile.getAbsolutePath());
-                    image.scaleToFit(500, 500);
-                    document.add(image);
-                    
-                    // spacing between screenshots in pdf
-                    document.add(new Paragraph(" "));
-                }
-                
-                document.close();
-                JOptionPane.showMessageDialog(this, "PDF exported successfully!");
+	private void exportToPDF() {
+		if (selectedFiles.isEmpty()) {
+			JOptionPane.showMessageDialog(null, "No images selected!");
+			return;
+		}
 
-                if (Desktop.isDesktopSupported()) {
-                    Desktop.getDesktop().browse(pdfFile.toURI());
-                } else {
-                    JOptionPane.showMessageDialog(this, "Desktop operations are not supported on this system");
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error while exporting to PDF: " + ex.getMessage());
-            }
-        }
-    }
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setDialogTitle("Save PDF");
+		fileChooser.setSelectedFile(new File(Constants.DEFAULT_PDF_NAME));
+		int userSelection = fileChooser.showSaveDialog(this);
+
+		if (userSelection == JFileChooser.APPROVE_OPTION) {
+			File pdfFile = fileChooser.getSelectedFile();
+
+			try {
+				Document document = new Document();
+				PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+				document.open();
+				for (File imageFile : selectedFiles) {
+					com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imageFile.getAbsolutePath());
+					System.out.println(imageFile.getAbsolutePath());
+					image.scaleToFit(500, 500);
+					document.add(image);
+				}
+				document.close();
+				JOptionPane.showMessageDialog(this, "PDF exported successfully!");
+
+				if (Desktop.isDesktopSupported()) {
+					Desktop.getDesktop().browse(pdfFile.toURI());
+				} else {
+					JOptionPane.showMessageDialog(this, "Desktop operations are not supported on this system");
+				}
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(this, "Error while exporting to PDF: " + ex.getMessage());
+			}
+		}
+	}
 }
