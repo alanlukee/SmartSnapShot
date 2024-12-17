@@ -1,62 +1,195 @@
-@startuml
-actor User
-participant MainWindow
-participant ScreenshotManager
-participant PopupFrame
-participant Timer
-participant PreviewWindow
-
-== Application Initialization ==
-User -> MainWindow: Open Application
-MainWindow -> User: Display Timer button enabled\n(Start and Stop disabled)
-
-== Timer Selection ==
-User -> MainWindow: Click Timer button
-MainWindow -> User: Show options (User Demand, Timer Interval)
-User -> MainWindow: Select mode (User Demand / Timer Interval)
-alt User Demand Mode
-    MainWindow -> ScreenshotManager: Set UserDemand flag = true
-else Timer Interval Mode
-    MainWindow -> User: Show interval options
-    User -> MainWindow: Select interval
-end
-MainWindow -> User: Enable Start button
-
-== Start Snapshot Process ==
-User -> MainWindow: Click Start button
-MainWindow -> ScreenshotManager: Minimize to taskbar\nPrompt folder selection
-User -> ScreenshotManager: Select folder
-alt User Demand Mode
-    ScreenshotManager -> PopupFrame: Show camera icon
-    loop On camera icon click
-        User -> PopupFrame: Click camera icon
-        PopupFrame -> ScreenshotManager: Capture screenshot
-        ScreenshotManager -> ScreenshotManager: Run takeScreenshot()
-        ScreenshotManager -> PopupFrame: Show camera icon again
-    end
-else Timer Interval Mode
-    ScreenshotManager -> Timer: Create Timer object
-    loop At intervals
-        Timer -> ScreenshotManager: Capture screenshot
-        ScreenshotManager -> ScreenshotManager: Run takeScreenshot()
-    end
-end
-MainWindow -> User: Enable Stop button
-
-== Stop Snapshot Process ==
-User -> MainWindow: Click Stop button
-alt User Demand Mode
-    ScreenshotManager -> ScreenshotManager: Set UserDemand flag = false
-    ScreenshotManager -> PopupFrame: Close camera icon
-else Timer Interval Mode
-    ScreenshotManager -> Timer: Stop and destroy Timer object
-end
-ScreenshotManager -> MainWindow: Enable Preview window
-
-== Open Preview Window ==
-MainWindow -> PreviewWindow: Open Preview window
-PreviewWindow -> ScreenshotManager: Fetch saved screenshots
-User -> PreviewWindow: Select images and click Export to PDF
-PreviewWindow -> ScreenshotManager: Compile selected images into PDF
-ScreenshotManager -> User: Open PDF in browser
-@enduml
+{
+  "diagram": {
+    "title": "Smart Snapshot Sequence Diagram",
+    "type": "sequenceDiagram",
+    "nodes": [
+      {
+        "id": "user",
+        "type": "actor",
+        "label": "User"
+      },
+      {
+        "id": "mainWindow",
+        "type": "participant",
+        "label": "MainWindow"
+      },
+      {
+        "id": "screenshotManager",
+        "type": "participant",
+        "label": "ScreenshotManager"
+      },
+      {
+        "id": "popupFrame",
+        "type": "participant",
+        "label": "PopupFrame"
+      },
+      {
+        "id": "timer",
+        "type": "participant",
+        "label": "Timer"
+      },
+      {
+        "id": "previewWindow",
+        "type": "participant",
+        "label": "PreviewWindow"
+      }
+    ],
+    "messages": [
+      {
+        "from": "user",
+        "to": "mainWindow",
+        "label": "Open Application"
+      },
+      {
+        "from": "mainWindow",
+        "to": "user",
+        "label": "Display Timer button enabled\n(Start and Stop disabled)"
+      },
+      {
+        "from": "user",
+        "to": "mainWindow",
+        "label": "Click Timer button"
+      },
+      {
+        "from": "mainWindow",
+        "to": "user",
+        "label": "Show options (User Demand, Timer Interval)"
+      },
+      {
+        "from": "user",
+        "to": "mainWindow",
+        "label": "Select mode (User Demand / Timer Interval)"
+      },
+      {
+        "from": "mainWindow",
+        "to": "screenshotManager",
+        "label": "Set UserDemand flag = true"
+      },
+      {
+        "from": "mainWindow",
+        "to": "user",
+        "label": "Show interval options"
+      },
+      {
+        "from": "user",
+        "to": "mainWindow",
+        "label": "Select interval"
+      },
+      {
+        "from": "mainWindow",
+        "to": "user",
+        "label": "Enable Start button"
+      },
+      {
+        "from": "user",
+        "to": "mainWindow",
+        "label": "Click Start button"
+      },
+      {
+        "from": "mainWindow",
+        "to": "screenshotManager",
+        "label": "Minimize to taskbar\nPrompt folder selection"
+      },
+      {
+        "from": "user",
+        "to": "screenshotManager",
+        "label": "Select folder"
+      },
+      {
+        "from": "screenshotManager",
+        "to": "popupFrame",
+        "label": "Show camera icon"
+      },
+      {
+        "loop": "On camera icon click",
+        "messages": [
+          {
+            "from": "user",
+            "to": "popupFrame",
+            "label": "Click camera icon"
+          },
+          {
+            "from": "popupFrame",
+            "to": "screenshotManager",
+            "label": "Capture screenshot"
+          },
+          {
+            "from": "screenshotManager",
+            "to": "screenshotManager",
+            "label": "Run takeScreenshot()"
+          },
+          {
+            "from": "screenshotManager",
+            "to": "popupFrame",
+            "label": "Show camera icon again"
+          }
+        ]
+      },
+      {
+        "loop": "At intervals",
+        "messages": [
+          {
+            "from": "timer",
+            "to": "screenshotManager",
+            "label": "Capture screenshot"
+          },
+          {
+            "from": "screenshotManager",
+            "to": "screenshotManager",
+            "label": "Run takeScreenshot()"
+          }
+        ]
+      },
+      {
+        "from": "user",
+        "to": "mainWindow",
+        "label": "Click Stop button"
+      },
+      {
+        "from": "screenshotManager",
+        "to": "screenshotManager",
+        "label": "Set UserDemand flag = false"
+      },
+      {
+        "from": "screenshotManager",
+        "to": "popupFrame",
+        "label": "Close camera icon"
+      },
+      {
+        "from": "screenshotManager",
+        "to": "timer",
+        "label": "Stop and destroy Timer object"
+      },
+      {
+        "from": "screenshotManager",
+        "to": "mainWindow",
+        "label": "Enable Preview window"
+      },
+      {
+        "from": "mainWindow",
+        "to": "previewWindow",
+        "label": "Open Preview window"
+      },
+      {
+        "from": "previewWindow",
+        "to": "screenshotManager",
+        "label": "Fetch saved screenshots"
+      },
+      {
+        "from": "user",
+        "to": "previewWindow",
+        "label": "Select images and click Export to PDF"
+      },
+      {
+        "from": "previewWindow",
+        "to": "screenshotManager",
+        "label": "Compile selected images into PDF"
+      },
+      {
+        "from": "screenshotManager",
+        "to": "user",
+        "label": "Open PDF in browser"
+      }
+    ]
+  }
+}
