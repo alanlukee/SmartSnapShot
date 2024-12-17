@@ -1,0 +1,80 @@
+from graphviz import Digraph
+
+# Create a directed graph
+diagram = Digraph("SmartSnapshotApp", format="png")
+diagram.attr(rankdir="TB", size="8,10")
+
+# Start node
+diagram.node("Start", "Start", shape="ellipse")
+
+# Initial state
+diagram.node("OpenApp", "User Opens Application", shape="box")
+diagram.node("ButtonsState", "[Timer Button Enabled,\nStart & Stop Buttons Disabled]", shape="diamond")
+
+# Timer button clicked and decision
+diagram.node("TimerClicked", "User Clicks Timer Button", shape="box")
+diagram.node("ModeSelect", "User Selects Mode", shape="diamond")
+diagram.node("UserDemand", "UserDemand Mode Set", shape="box")
+diagram.node("IntervalMode", "Interval Mode Set", shape="box")
+diagram.node("EnableStart", "[Enable Start Button]", shape="box")
+
+# Start button clicked
+diagram.node("StartClicked", "User Clicks Start", shape="box")
+diagram.node("Minimize", "[Minimize Main Window]", shape="box")
+diagram.node("SelectFolder", "Select Folder to Save", shape="box")
+
+# UserDemand Mode Flow
+diagram.node("ActivateUserDemand", "Activate UserDemand", shape="box")
+diagram.node("PopupVisible", "[Popup Frame Visible]", shape="box")
+diagram.node("PopupClick", "Popup Click = Take Screenshot", shape="box")
+
+# Interval Mode Flow
+diagram.node("ActivateTimer", "Activate Timer Mode", shape="box")
+diagram.node("TimerCalls", "[Timer Calls Take Screenshot]", shape="box")
+
+# Stop mechanism
+diagram.node("StopClicked", "User Clicks Stop Button", shape="box")
+diagram.node("DisableStop", "[Disable Stop Button]", shape="box")
+diagram.node("StopUserDemand", "[Stop UserDemand Mode]", shape="box")
+diagram.node("StopTimer", "[Stop Timer Mode]", shape="box")
+diagram.node("OpenPreview", "[Open Preview Window]", shape="box")
+
+# Export process
+diagram.node("DisplayScreenshots", "Display Screenshots with Checkboxes", shape="box")
+diagram.node("ExportPDF", "User Selects Images & Clicks Export to PDF", shape="box")
+diagram.node("ExportComplete", "Export Images to PDF & Open in Browser", shape="box")
+diagram.node("End", "End", shape="ellipse")
+
+# Connect nodes
+diagram.edges([
+    ("Start", "OpenApp"),
+    ("OpenApp", "ButtonsState"),
+    ("ButtonsState", "TimerClicked"),
+    ("TimerClicked", "ModeSelect"),
+    ("ModeSelect", "UserDemand"),
+    ("ModeSelect", "IntervalMode"),
+    ("UserDemand", "EnableStart"),
+    ("IntervalMode", "EnableStart"),
+    ("EnableStart", "StartClicked"),
+    ("StartClicked", "Minimize"),
+    ("Minimize", "SelectFolder"),
+    ("SelectFolder", "ActivateUserDemand"),
+    ("SelectFolder", "ActivateTimer"),
+    ("ActivateUserDemand", "PopupVisible"),
+    ("PopupVisible", "PopupClick"),
+    ("ActivateTimer", "TimerCalls"),
+    ("PopupClick", "StopClicked"),
+    ("TimerCalls", "StopClicked"),
+    ("StopClicked", "DisableStop"),
+    ("DisableStop", "StopUserDemand"),
+    ("DisableStop", "StopTimer"),
+    ("StopUserDemand", "OpenPreview"),
+    ("StopTimer", "OpenPreview"),
+    ("OpenPreview", "DisplayScreenshots"),
+    ("DisplayScreenshots", "ExportPDF"),
+    ("ExportPDF", "ExportComplete"),
+    ("ExportComplete", "End")
+])
+
+# Render the diagram
+diagram.render("SmartSnapshotApp_ActivityDiagram", view=True)
