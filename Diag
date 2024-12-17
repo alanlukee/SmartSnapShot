@@ -2,14 +2,116 @@ package com.junitTesting;
 
 import static org.junit.Assert.*;
 
+import java.awt.event.ActionEvent;
+import javax.swing.JButton;
+
+import org.junit.Before;
 import org.junit.Test;
+
+import com.view.ButtonsBar;
+import com.view.ButtonsListener;
 
 public class ButtonsBarTest {
 
-	@Test
-	public void test() {
-		fail("Not yet implemented");
-	}
+    private ButtonsBar buttonsBar;
+    private boolean startActionTriggered;
+    private boolean stopActionTriggered;
+    private boolean timerActionTriggered;
 
+    @Before
+    public void setUp() {
+        buttonsBar = new ButtonsBar();
+        startActionTriggered = false;
+        stopActionTriggered = false;
+        timerActionTriggered = false;
+
+        buttonsBar.setButtonsListener(new ButtonsListener() {
+            @Override
+            public void startButtonAction() {
+                startActionTriggered = true;
+            }
+
+            @Override
+            public void stopButtonAction() {
+                stopActionTriggered = true;
+            }
+
+            @Override
+            public void timerButtonAction() {
+                timerActionTriggered = true;
+            }
+        });
+    }
+
+    @Test
+    public void testStartButtonAction() {
+        JButton startButton = buttonsBar.getStartButton();
+        assertNotNull("Start button should not be null", startButton);
+
+        // Simulate clicking the start button
+        startButton.doClick();
+
+        assertTrue("Start button action should be triggered", startActionTriggered);
+    }
+
+    @Test
+    public void testStopButtonAction() {
+        JButton stopButton = buttonsBar.getStopButton();
+        assertNotNull("Stop button should not be null", stopButton);
+
+        // Enable the stop button before testing
+        buttonsBar.enableStopButon(true);
+        assertTrue("Stop button should be enabled", stopButton.isEnabled());
+
+        // Simulate clicking the stop button
+        stopButton.doClick();
+
+        assertTrue("Stop button action should be triggered", stopActionTriggered);
+    }
+
+    @Test
+    public void testTimerButtonAction() {
+        JButton timerButton = buttonsBar.getTimerButton();
+        assertNotNull("Timer button should not be null", timerButton);
+
+        // Simulate clicking the timer button
+        timerButton.doClick();
+
+        assertTrue("Timer button action should be triggered", timerActionTriggered);
+    }
+
+    @Test
+    public void testSetActiveButtonIcon() {
+        buttonsBar.setActiveButtonIcon();
+
+        // Check that the icon for the start button has changed
+        JButton startButton = buttonsBar.getStartButton();
+        assertNotNull("Start button icon should not be null", startButton.getIcon());
+    }
+
+    @Test
+    public void testSetStopButtonIcon() {
+        String newIconPath = "test/path/to/icon.png";
+        buttonsBar.setStopButtonIcon(newIconPath);
+
+        JButton stopButton = buttonsBar.getStopButton();
+        assertNotNull("Stop button icon should not be null", stopButton.getIcon());
+    }
+
+    @Test
+    public void testSetStartButtonIcon() {
+        buttonsBar.setStartButtonIcon();
+
+        JButton startButton = buttonsBar.getStartButton();
+        assertNotNull("Start button icon should not be null", startButton.getIcon());
+    }
+
+    @Test
+    public void testEnableStopButton() {
+        buttonsBar.enableStopButon(true);
+        assertTrue("Stop button should be enabled", buttonsBar.getStopButton().isEnabled());
+
+        buttonsBar.enableStopButon(false);
+        assertFalse("Stop button should be disabled", buttonsBar.getStopButton().isEnabled());
+    }
 }
-
