@@ -1,51 +1,104 @@
-sequenceDiagram
-  User->>+MainWindow: Open Application
-  MainWindow-->>-User: Display Timer button enabled (Start and Stop disabled)
+@startuml
+actor User
+participant MainWindow
+participant ScreenshotManager
+participant PopupFrame
+participant Timer
+participant PreviewWindow
 
-  User->>+MainWindow: Click Timer button
-  MainWindow-->>-User: Show options (User Demand, Timer Interval)
+== Application Initialization ==
+User -> MainWindow: Open Application
+activate MainWindow
+MainWindow -> User: Display Timer button enabled\n(Start and Stop disabled)
+deactivate MainWindow
 
-  User->>+MainWindow: Select mode (User Demand / Timer Interval)
-  alt User Demand Mode
-    MainWindow->>+ScreenshotManager: Set UserDemand flag = true
-  else Timer Interval Mode
-    MainWindow-->>-User: Show interval options
-    User->>+MainWindow: Select interval
-  end
-  MainWindow-->>-User: Enable Start button
+== Timer Selection ==
+User -> MainWindow: Click Timer button
+activate MainWindow
+MainWindow -> User: Show options (User Demand, Timer Interval)
+deactivate MainWindow
+User -> MainWindow: Select mode (User Demand / Timer Interval)
+activate MainWindow
+alt User Demand Mode
+    MainWindow -> ScreenshotManager: Set UserDemand flag = true
+    activate ScreenshotManager
+    deactivate ScreenshotManager
+else Timer Interval Mode
+    MainWindow -> User: Show interval options
+    deactivate MainWindow
+    User -> MainWindow: Select interval
+    activate MainWindow
+end
+MainWindow -> User: Enable Start button
+deactivate MainWindow
 
-  User->>+MainWindow: Click Start button
-  MainWindow->>+ScreenshotManager: Minimize to taskbar and prompt folder selection
-  User-->>-ScreenshotManager: Select folder
-
-  alt User Demand Mode
-    ScreenshotManager->>+PopupFrame: Show camera icon
+== Start Snapshot Process ==
+User -> MainWindow: Click Start button
+activate MainWindow
+MainWindow -> ScreenshotManager: Minimize to taskbar\nPrompt folder selection
+deactivate MainWindow
+activate ScreenshotManager
+User -> ScreenshotManager: Select folder
+alt User Demand Mode
+    ScreenshotManager -> PopupFrame: Show camera icon
+    activate PopupFrame
     loop On camera icon click
-      User->>+PopupFrame: Click camera icon
-      PopupFrame-->>-ScreenshotManager: Capture screenshot
-      ScreenshotManager->>ScreenshotManager: Run takeScreenshot()
-      ScreenshotManager->>+PopupFrame: Show camera icon again
+        User -> PopupFrame: Click camera icon
+        activate PopupFrame
+        PopupFrame -> ScreenshotManager: Capture screenshot
+        deactivate PopupFrame
+        activate ScreenshotManager
+        ScreenshotManager -> ScreenshotManager: Run takeScreenshot()
+        deactivate ScreenshotManager
+        ScreenshotManager -> PopupFrame: Show camera icon again
+        activate PopupFrame
     end
-  else Timer Interval Mode
-    ScreenshotManager->>+Timer: Create Timer object
+    deactivate PopupFrame
+else Timer Interval Mode
+    ScreenshotManager -> Timer: Create Timer object
+    activate Timer
     loop At intervals
-      Timer->>+ScreenshotManager: Capture screenshot
-      ScreenshotManager->>ScreenshotManager: Run takeScreenshot()
+        Timer -> ScreenshotManager: Capture screenshot
+        activate ScreenshotManager
+        ScreenshotManager -> ScreenshotManager: Run takeScreenshot()
+        deactivate ScreenshotManager
     end
-  end
-  MainWindow-->>-User: Enable Stop button
+    deactivate Timer
+end
+ScreenshotManager -> User: Enable Stop button
+deactivate ScreenshotManager
 
-  User->>+MainWindow: Click Stop button
-  alt User Demand Mode
-    ScreenshotManager->>ScreenshotManager: Set UserDemand flag = false
-    ScreenshotManager->>+PopupFrame: Close camera icon
-  else Timer Interval Mode
-    ScreenshotManager->>+Timer: Stop and destroy Timer object
-  end
-  ScreenshotManager-->>-MainWindow: Enable Preview window
+== Stop Snapshot Process ==
+User -> MainWindow: Click Stop button
+activate MainWindow
+alt User Demand Mode
+    MainWindow -> ScreenshotManager: Set UserDemand flag = false
+    activate ScreenshotManager
+    ScreenshotManager -> PopupFrame: Close camera icon
+    deactivate PopupFrame
+    deactivate ScreenshotManager
+else Timer Interval Mode
+    MainWindow -> ScreenshotManager: Stop and destroy Timer object
+    activate ScreenshotManager
+    deactivate Timer
+    deactivate ScreenshotManager
+end
+MainWindow -> User: Enable Preview window
+deactivate MainWindow
 
-  MainWindow->>+PreviewWindow: Open Preview window
-  PreviewWindow->>+ScreenshotManager: Fetch saved screenshots
-  User->>+PreviewWindow: Select images and click Export to PDF
-  PreviewWindow->>+ScreenshotManager: Compile selected images into PDF
-  ScreenshotManager-->>-User: Open PDF in browser
+== Open Preview Window ==
+User -> MainWindow: Open Preview window
+activate MainWindow
+MainWindow -> PreviewWindow: Open Preview window
+deactivate MainWindow
+activate PreviewWindow
+PreviewWindow -> ScreenshotManager: Fetch saved screenshots
+deactivate PreviewWindow
+activate ScreenshotManager
+User -> PreviewWindow: Select images and click Export to PDF
+activate PreviewWindow
+PreviewWindow -> ScreenshotManager: Compile selected images into PDF
+deactivate ScreenshotManager
+PreviewWindow -> User: Open PDF in browser
+deactivate PreviewWindow
+@enduml
