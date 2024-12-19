@@ -1,9 +1,13 @@
 package com.controller;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Point;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -13,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
@@ -28,9 +33,8 @@ public class ScreenshotController {
 	private ButtonsBar buttonsBar;
 	private PreviewWindow previewWindow;
 	private Timer screenshotTimer;
-	JFileChooser folderChooser;
-
-	JWindow popupFrame;
+	private JFileChooser folderChooser;
+	private JWindow popupFrame;
 
 	public ScreenshotController(ButtonsBar buttonsBar) {
 
@@ -58,7 +62,7 @@ public class ScreenshotController {
 			}
 		});
 	}
-
+	
 	private void startScreenShotProcess() {
 
 		if (!model.isActive()) {
@@ -69,19 +73,37 @@ public class ScreenshotController {
 
 			if (result == JFileChooser.APPROVE_OPTION) {
 				String selectedFolder = folderChooser.getSelectedFile().getAbsolutePath();
+				File folder = new File(selectedFolder);
+				File[] files = folder.listFiles((dir, name) -> name.endsWith(".png") || name.endsWith(".jpg"));
+				if (files != null && files.length > 0) {
+
+					int deleteChoice = JOptionPane.showConfirmDialog(null,
+							"Existing Screenshot files detected. Do you want to delete them?",
+							"Delete files confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+					if (deleteChoice == JOptionPane.YES_OPTION) {
+						for (File file : files) {
+							file.delete();
+						}
+						JOptionPane.showMessageDialog(null, "Existing screenshots are deleted");
+					} else {
+						JOptionPane.showMessageDialog(null, "Existing screenshots are retained");
+					}
+				}
 				model.setFolderPath(selectedFolder);
-				System.out.println("Screenshots will be saved to :" + selectedFolder);
 				model.setActive(true);
 			} else {
 
 				int userChoice = JOptionPane.showConfirmDialog(null,
-						"No folder selected, Do ypu want to save it in default folder?", "Confirmation",
+						"No folder selected, Do you want to save it in default folder?", "Confirmation",
 						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
 				if (userChoice == JOptionPane.YES_OPTION) {
 					model.setActive(true);
 				} else {
-					System.out.println("USER Do not want to proceed..");
+					buttonsBar.getStartButton().setEnabled(false);
+					model.setActive(false);
+					model.setUserDemandMode(false);
 				}
 
 			}
@@ -89,16 +111,14 @@ public class ScreenshotController {
 			if (model.isUserDemandMode()) {
 
 				startUserDemandMode();
-				
+
 			} else {
-				
+
 				startTimerMode();
 			}
-		} else {
-
-			System.out.println("Start button is already active");
 		}
 	}
+
 
 	private void startUserDemandMode() {
 		System.out.println("User demand mode activated");
@@ -112,30 +132,73 @@ public class ScreenshotController {
 				// TODO Auto-generated method stub
 
 				popupFrame = new JWindow();
+				
 				popupFrame.setSize(50, 50);
 				popupFrame.setVisible(true);
+				
+				SwingUtilities.invokeLater(() -> {
+					JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(buttonsBar);
+					if (mainFrame != null) {
+						mainFrame.setState(JFrame.ICONIFIED);
+					}
+				});
+				
 				popupFrame.setLocation(1200, 200);
+				popupFrame.setAlwaysOnTop(true);
+				JPanel panel = new JPanel();
+				
+				panel.setLayout(new BorderLayout());
+				panel.setBackground(new Color(255,0,0));
+			
 
 				ImageIcon cameraIcon = new ImageIcon(Constants.CAMERA_ICON_PATH);
 				Image scaledCameraImage = cameraIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
 				ImageIcon scaledCameraIcon = new ImageIcon(scaledCameraImage);
-
+				
 				JButton takeScreenShotButton = new JButton(scaledCameraIcon);
 				takeScreenShotButton.setBorder(BorderFactory.createEmptyBorder());
-				popupFrame.add(takeScreenShotButton);
-				popupFrame.setVisible(true);
-				popupFrame.setAlwaysOnTop(true);
-				popupFrame.toFront();
-				popupFrame.requestFocus();
+				
+				//takeScreenShotButton.setBounds(0, 10,40,40);
+				panel.add(takeScreenShotButton,BorderLayout.CENTER);
+				popupFrame.add(panel);
+				
+				final Point[] initialClick = {null};
 
-				takeScreenShotButton.addActionListener(new ActionListener() {
+				takeScreenShotButton.addMouseListener(new MouseAdapter() {
 
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void mousePressed(MouseEvent e) {
 						// TODO Auto-generated method stub
+						initialClick[0] = e.getPoint();
+					}	
+				});
+				
+				
+				takeScreenShotButton.addMouseMotionListener(new MouseAdapter() {
+
+					@Override
+					public void mouseDragged(MouseEvent e) {
+						// TODO Auto-generated method stub
+						if(initialClick[0] !=null) {
+							int currentX = popupFrame.getLocation().x;
+							int currentY = popupFrame.getLocation().y;
+							
+							int newX = currentX + e.getX() - initialClick[0].x;
+							int newY = currentY + e.getY() - initialClick[0].y;
+							popupFrame.setLocation(newX, newY);
+						}
+					}					
+				});
+				
+				takeScreenShotButton.addMouseListener(new MouseAdapter() {
+
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						// TODO Auto-generated method stub
+						//super.mouseClicked(e);
 						ImageIcon activeIcon = new ImageIcon(Constants.ACTIVE_ICON_PATH);
 						Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85, Image.SCALE_SMOOTH);
-
+						
 						JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(buttonsBar);
 						if (mainFrame != null) {
 							mainFrame.setState(JFrame.ICONIFIED);
@@ -145,18 +208,15 @@ public class ScreenshotController {
 						model.takeScreenshot();
 						popupFrame.setVisible(true);
 						popupFrame.setAlwaysOnTop(true);
-						popupFrame.toFront();
-						popupFrame.requestFocus();
-
 					}
-				});
+				});		
 			}
 		});
 	}
 
 	private void startTimerMode() {
 		if (model.isActive()) {
-			System.out.println("Snapshot functionality initiated.");
+			
 
 			buttonsBar.setActiveButtonIcon();
 			buttonsBar.enableStopButon(true);
@@ -185,11 +245,8 @@ public class ScreenshotController {
 
 			}, 1000, model.getInterval());
 
-		} else {
-			System.out.println("Start button is already active.");
-		}
+		} 
 	}
-
 	private void stopScreenShotProcess() {
 
 		if (model.isActive()) {
@@ -201,20 +258,29 @@ public class ScreenshotController {
 				buttonsBar.setStartButtonIcon();
 				buttonsBar.enableStopButon(false);
 				popupFrame.setVisible(false);
+				
+				model.resetScreenshotCounter();
 
 				SwingUtilities.invokeLater(new Runnable() {
 
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
-						System.out.println("Opening preview window");
+						
+						SwingUtilities.invokeLater(() -> {
+							JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(buttonsBar);
+							if (mainFrame != null) {
+								mainFrame.dispose();
+		
+							}
+						});
 						openPreviewWindow();
 					}
 				});
 			}
 
 			else {
-				System.out.println("SnapShot stopped");
+				
 				model.setActive(false);
 				buttonsBar.setStartButtonIcon();
 				buttonsBar.enableStopButon(false);
@@ -230,8 +296,14 @@ public class ScreenshotController {
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
-						System.out.println("Opening preview window");
-
+						
+						SwingUtilities.invokeLater(() -> {
+							JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(buttonsBar);
+							if (mainFrame != null) {
+								mainFrame.dispose();
+		
+							}
+						});
 						openPreviewWindow();
 						
 					}
@@ -242,10 +314,12 @@ public class ScreenshotController {
 
 	private void timerProcess() {
 
-		String selectedOption = (String) JOptionPane.showInputDialog(null, "Choose timer mode", "Timer mode selection",
+		String selectedOption = (String) JOptionPane.showInputDialog(buttonsBar, "Choose timer mode", "Timer mode selection",
 				JOptionPane.PLAIN_MESSAGE, null, Constants.TIMER_OPTIONS, Constants.TIMER_OPTIONS[0]);
 
 		if (selectedOption != null) {
+			
+			buttonsBar.enableStartButton(true);
 			switch (selectedOption) {
 
 			case ("Time interval"):
@@ -264,13 +338,13 @@ public class ScreenshotController {
 	}
 
 	private void userDemandMode() {
-		System.out.println("Clicked user demand");
+		JOptionPane.showMessageDialog(null, "User Demand mode Activated");
 		model.setUserDemandMode(true);
 	}
 
 	private void timeIntervalMode() {
 
-		String selected = (String) JOptionPane.showInputDialog(null, "Select timer interval (seconds):", "Set Timer",
+		String selected = (String) JOptionPane.showInputDialog(buttonsBar, "Select timer interval (seconds):", "Set Timer",
 				JOptionPane.PLAIN_MESSAGE, null, Constants.TIMER_INTERVAL_OPTIONS,
 				String.valueOf(model.getInterval() / 1000));
 
@@ -307,14 +381,20 @@ public class ScreenshotController {
 
 		}, 0, model.getInterval());
 
-		System.out.println("Timer restarted with new interval: " + model.getInterval() / 1000 + " seconds");
+		JOptionPane.showMessageDialog(null, "Timer restarted with new interval: " + model.getInterval() + " seconds");
 	}
 
 	private void openPreviewWindow() {
 
 		if (previewWindow == null || !previewWindow.isVisible()) {
-			previewWindow = new PreviewWindow(model.getScreenShots());
-			previewWindow.setVisible(true);
+			if(model.getScreenShots().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "No images found!", "Info", JOptionPane.INFORMATION_MESSAGE);
+			}
+			else {
+				previewWindow = new PreviewWindow(model.getScreenShots());
+				previewWindow.setVisible(true);
+			}
+
 		} else {
 			previewWindow.refresh(model.getScreenShots());
 		}
