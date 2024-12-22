@@ -1,0 +1,126 @@
+package com.controller;
+
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.*;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.view.PreviewWindow;
+
+public class PreviewWindowController {
+
+	private PreviewWindow preview;
+	private List<File> selectedFiles = new ArrayList<>();
+	private ArrayList<File> screenshots;
+	private JPanel imagePanel;
+	private JCheckBox checkBox;
+	private JFileChooser fileChooser;
+
+	public PreviewWindowController(PreviewWindow view, ArrayList<File> screenshots) {
+		
+		this.preview = view;
+		this.screenshots = screenshots;
+	}
+
+	public void loadImages(ArrayList<File> screenshots) {
+		imagePanel = preview.getImagePanel();
+		imagePanel.removeAll();
+		preview.getCheckBoxes().clear();
+		selectedFiles.clear();
+
+		if (screenshots.isEmpty()) {
+			JOptionPane.showMessageDialog(preview, "No images found!", "Info", JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			for (File file : screenshots) {
+				preview.addImageToPanel(file);
+			}
+		}
+		imagePanel.revalidate();
+		imagePanel.repaint();
+	}
+
+	public void selectAllImages() {
+		
+		selectedFiles.clear();
+		for (File file : screenshots) {
+			if (!selectedFiles.contains(file)) {
+				selectedFiles.add(file);
+			}
+		}
+
+		for (int i = 0; i < preview.getCheckBoxes().size(); i++) {
+
+			checkBox = preview.getCheckBoxes().get(i);
+			if (!checkBox.isSelected()) {
+				checkBox.setSelected(true);
+			}
+			else {
+				checkBox.setSelected(false);
+				selectedFiles.clear();
+			}
+
+		}
+	}
+
+	public void toggleImageSelection(File file, JCheckBox checkBox) {
+		checkBox.setSelected(!checkBox.isSelected());
+		if (checkBox.isSelected()) {
+			selectedFiles.add(file);
+		} else {
+			selectedFiles.remove(file);
+		}
+	}
+
+	public void exportToPDF() {
+		if (selectedFiles.isEmpty()) {
+			JOptionPane.showMessageDialog(preview, "No images selected!");
+			return;
+		}
+
+		String headingText = JOptionPane.showInputDialog(preview, "Enter the heading for the PDF:", "PDF Heading",
+				JOptionPane.PLAIN_MESSAGE);
+		if (headingText == null || headingText.trim().isEmpty()) {
+			headingText = "Test Results:";
+		}
+
+		fileChooser = new JFileChooser();
+		fileChooser.setDialogTitle("Save PDF");
+		fileChooser.setSelectedFile(new File("fileName.pdf"));
+		int userSelection = fileChooser.showSaveDialog(preview);
+
+		if (userSelection == JFileChooser.APPROVE_OPTION) {
+			File pdfFile = fileChooser.getSelectedFile();
+			try {
+				Document document = new Document();
+				PdfWriter.getInstance(document, new FileOutputStream(pdfFile));
+				document.open();
+
+				Paragraph heading = new Paragraph(headingText,
+						FontFactory.getFont(FontFactory.HELVETICA, 18, BaseColor.BLACK));
+				heading.setAlignment(Paragraph.ALIGN_CENTER);
+				document.add(heading);
+				document.add(new Paragraph(" "));
+
+				for (File imageFile : selectedFiles) {
+					com.itextpdf.text.Image image = com.itextpdf.text.Image.getInstance(imageFile.getAbsolutePath());
+					image.scaleToFit(500, 500);
+					document.add(image);
+					document.add(new Paragraph(" "));
+				}
+
+				document.close();
+				JOptionPane.showMessageDialog(preview, "PDF exported successfully!");
+
+				if (Desktop.isDesktopSupported()) {
+					Desktop.getDesktop().browse(pdfFile.toURI());
+				}
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(preview, "Error while exporting to PDF: " + ex.getMessage());
+			}
+		}
+	}
+}
+
