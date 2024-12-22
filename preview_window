@@ -1,0 +1,111 @@
+package com.view;
+
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import com.utils.Constants;
+import com.controller.PreviewWindowController;
+
+@SuppressWarnings("serial")
+public class PreviewWindow extends JFrame {
+
+	private JPanel imagePanel;
+	private ArrayList<JCheckBox> checkBoxes = new ArrayList<>();
+	private JButton selectAllButton = new JButton("Select All");
+	private JButton exportButton = new JButton("Export-To-PDF");
+	private PreviewWindowController previewWindowController;
+	
+	
+	public PreviewWindow(ArrayList<File> screenshots) {
+		
+		previewWindowController = new PreviewWindowController(this, screenshots);
+		
+
+		setTitle("Preview Window");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setSize(1000, 600);
+		setLocationRelativeTo(null);
+		Image icon = Toolkit.getDefaultToolkit().getImage(Constants.PREVIEW_ICON_PATH);
+		setIconImage(icon);
+
+		imagePanel = new JPanel();
+		imagePanel.setLayout(new BoxLayout(imagePanel, BoxLayout.Y_AXIS));
+		imagePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+		JScrollPane scrollPane = new JScrollPane(imagePanel);
+		add(scrollPane, BorderLayout.CENTER);
+
+		add(selectAllButton, BorderLayout.NORTH);
+		add(exportButton, BorderLayout.SOUTH);
+
+		previewWindowController.loadImages(screenshots);
+
+		selectAllButton.addActionListener(e -> previewWindowController.selectAllImages());
+		exportButton.addActionListener(e -> previewWindowController.exportToPDF());
+	}
+
+	public JPanel getImagePanel() {
+		return imagePanel;
+	}
+
+	public ArrayList<JCheckBox> getCheckBoxes() {
+		return checkBoxes;
+	}
+
+	public void addImageToPanel(File file) {
+		try {
+			BufferedImage bufferedImage = ImageIO.read(file);
+			if (bufferedImage == null) {
+				JOptionPane.showMessageDialog(null, "Failed to load the image!");
+				return;
+			}
+
+			int windowWidth = getWidth() - 40;
+			int scaledHeight = (bufferedImage.getHeight() * windowWidth) / bufferedImage.getWidth();
+			Image scaledImage = bufferedImage.getScaledInstance(windowWidth, scaledHeight, Image.SCALE_SMOOTH);
+			ImageIcon icon = new ImageIcon(scaledImage);
+
+			JLabel imageLabel = new JLabel(icon);
+			JCheckBox checkBox = new JCheckBox(file.getName());
+			checkBox.setFont(new Font("Arial", Font.BOLD, 14));
+			checkBox.setHorizontalAlignment(SwingConstants.CENTER);
+			checkBox.setPreferredSize(new Dimension(windowWidth, 30));
+
+			JPanel imageContainer = new JPanel();
+			imageContainer.setLayout(new BorderLayout());
+			imageContainer.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.GRAY, 1),
+					BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+			imageContainer.setBackground(new Color(240, 248, 255));
+
+			imageContainer.add(imageLabel, BorderLayout.CENTER);
+			imageContainer.add(checkBox, BorderLayout.SOUTH);
+
+			checkBoxes.add(checkBox);
+			imagePanel.add(imageContainer);
+			imagePanel.add(Box.createVerticalStrut(15));
+
+			imageLabel.addMouseListener(new MouseAdapter() {
+
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					previewWindowController.toggleImageSelection(file, checkBox);
+				}
+			});
+
+			checkBox.addActionListener(e -> previewWindowController.toggleImageSelection(file, checkBox));
+
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(null, "Failed to add image: " + ex.getMessage());
+		}
+	}
+
+	public void refresh(ArrayList<File> screenshots) {
+		previewWindowController.loadImages(screenshots);
+	}
+
+}
